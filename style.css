@@ -1,0 +1,32 @@
+body {
+  font-family: "Arial", sans-serif;
+  text-align: center;
+  background-color: #f0f0f0;
+}
+
+#game {
+  display: grid;
+  grid-template-columns: repeat(7, 60px);
+  gap: 5px;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.cell {
+  width: 60px;
+  height: 60px;
+  background-color: #ddd;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.cell.red {
+  background-color: #e74c3c;
+}
+
+.cell.blue {
+  background-color: #3498db;
+}
