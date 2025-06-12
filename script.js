@@ -1,74 +1,94 @@
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
 const COLS = 7;
 const ROWS = 6;
-let board = [];
+const CELL_SIZE = 60;
+
+let board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
 let currentPlayer = "red";
 let gameOver = false;
+let fallingPiece = null;
 
-const game = document.getElementById("game");
-const status = document.getElementById("status");
+function drawBoard() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function toggleRules() {
-  const ruleBox = document.getElementById("rules");
-  ruleBox.classList.toggle("hidden");
-}
-
-function createBoard() {
-  board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
-  game.innerHTML = "";
+  // 格線
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      cell.dataset.row = r;
-      cell.dataset.col = c;
-      game.appendChild(cell);
+      ctx.strokeStyle = "#aaa";
+      ctx.strokeRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+      const piece = board[r][c];
+      if (piece) drawCircle(c, r, piece);
     }
+  }
+
+  // 動畫棋子
+  if (fallingPiece) {
+    drawCircle(fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
   }
 }
 
-function resetGame() {
-  createBoard();
-  currentPlayer = "red";
-  gameOver = false;
-  status.textContent = "輪到玩家 🟥";
+function drawCircle(col, row, color) {
+  ctx.beginPath();
+  ctx.arc(
+    col * CELL_SIZE + CELL_SIZE / 2,
+    row * CELL_SIZE + CELL_SIZE / 2,
+    CELL_SIZE / 2 - 5,
+    0,
+    2 * Math.PI
+  );
+  ctx.fillStyle = color === "red" ? "#e74c3c" : "#3498db";
+  ctx.fill();
 }
 
-function dropPiece(col) {
-  if (gameOver) return;
-
+function getAvailableRow(col) {
   for (let r = ROWS - 1; r >= 0; r--) {
-    if (!board[r][col]) {
-      board[r][col] = currentPlayer;
-      updateCell(r, col, currentPlayer);
+    if (!board[r][col]) return r;
+  }
+  return null;
+}
 
-      const winCoords = checkForSquareWin(currentPlayer);
-      if (winCoords) {
-        winCoords.forEach(([r, c]) => {
-          const index = r * COLS + c;
-          game.children[index].classList.add("win");
-        });
-        status.textContent = `玩家 ${currentPlayer === "red" ? "🟥" : "🟦"} 獲勝！`;
-        gameOver = true;
-      } else if (isBoardFull()) {
-        status.textContent = "平手！";
-        gameOver = true;
-      } else {
-        currentPlayer = currentPlayer === "red" ? "blue" : "red";
-        status.textContent = `輪到玩家 ${currentPlayer === "red" ? "🟥" : "🟦"}`;
-      }
-      break;
+canvas.addEventListener("click", (e) => {
+  if (gameOver || fallingPiece) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const col = Math.floor(x / CELL_SIZE);
+  const row = getAvailableRow(col);
+
+  if (row === null) return;
+
+  // 動畫啟動
+  fallingPiece = {
+    col,
+    row,
+    y: 0,
+    color: currentPlayer,
+  };
+
+  animateDrop();
+});
+
+function animateDrop() {
+  if (!fallingPiece) return;
+
+  fallingPiece.y += 10;
+  if (fallingPiece.y / CELL_SIZE >= fallingPiece.row) {
+    board[fallingPiece.row][fallingPiece.col] = fallingPiece.color;
+    fallingPiece = null;
+    if (checkForSquareWin(currentPlayer)) {
+      document.getElementById("status").textContent = `玩家 ${currentPlayer === "red" ? "🟥" : "🟦"} 獲勝！`;
+      gameOver = true;
+    } else {
+      currentPlayer = currentPlayer === "red" ? "blue" : "red";
+      document.getElementById("status").textContent = `輪到玩家 ${currentPlayer === "red" ? "🟥" : "🟦"}`;
     }
   }
-}
 
-function updateCell(row, col, color) {
-  const index = row * COLS + col;
-  const cell = game.children[index];
-  cell.classList.add(color);
-}
-
-function isBoardFull() {
-  return board.every(row => row.every(cell => cell !== null));
+  drawBoard();
+  if (fallingPiece) requestAnimationFrame(animateDrop);
 }
 
 function checkForSquareWin(player) {
@@ -81,23 +101,24 @@ function checkForSquareWin(player) {
           board[r + size - 1][c] === player &&
           board[r + size - 1][c + size - 1] === player
         ) {
-          return [
-            [r, c],
-            [r, c + size - 1],
-            [r + size - 1, c],
-            [r + size - 1, c + size - 1]
-          ];
+          return true;
         }
       }
     }
   }
-  return null;
+  return false;
 }
 
-game.addEventListener("click", (e) => {
-  if (!e.target.classList.contains("cell")) return;
-  const col = parseInt(e.target.dataset.col);
-  dropPiece(col);
-});
+function resetGame() {
+  board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  currentPlayer = "red";
+  gameOver = false;
+  document.getElementById("status").textContent = "輪到玩家 🟥";
+  drawBoard();
+}
+
+function toggleRules() {
+  document.getElementById("rules").classList.toggle("hidden");
+}
 
 resetGame();
