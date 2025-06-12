@@ -1,4 +1,5 @@
 body {
+  font-family: "Noto Sans TC", "Poppins", "Arial", sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -7,7 +8,6 @@ body {
   margin: 0;
   padding: 10px;
   background-color: #f0f0f0;
-  font-family: "Noto Sans TC", "Poppins", "Arial", sans-serif;
 }
 
 .top-bar {
@@ -27,7 +27,8 @@ h1 {
 }
 
 .reset-btn,
-.info-btn {
+.info-btn,
+.close-btn {
   width: 40px;
   height: 40px;
   font-size: 20px;
@@ -39,39 +40,77 @@ h1 {
   transition: all 0.3s ease;
 }
 
-#rules {
-  max-width: 440px;
+#status {
+  margin: 8px 0;
+  font-size: 1.1rem;
+}
+
+.blink {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { background-color: #fff; }
+  50% { background-color: #ffe066; }
+}
+
+/* 規則浮窗覆蓋 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(6px);
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rules-popup {
   background: white;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 5px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
-  font-size: 0.95rem;
+  padding: 20px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.25);
+  position: relative;
+  font-size: 1rem;
   line-height: 1.5;
+}
+
+.rules-popup p {
+  margin: 0 0 10px;
+  font-weight: bold;
+}
+
+.rules-popup ul {
+  padding-left: 20px;
+  margin: 0;
+  text-align: left;
+}
+
+.close-btn {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  background-color: #ff5f5f;
+  color: white;
+  font-weight: bold;
 }
 
 .hidden {
   display: none;
 }
 
-#gameCanvas {
-  border: 4px solid #888;
-  border-radius: 10px;
-  background-color: #ffffff;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-#status {
-  margin: 8px 0;
-  font-size: 1.1rem;
-}
-
-/* 勝利時讓 reset 按鈕閃爍 */
-.blink {
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%, 100% { background-color: #ffffff; }
-  50% { background-color: #ffe066; }
+/* 響應式 */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.8rem;
+  }
+  #status {
+    font-size: 1rem;
+  }
 }
