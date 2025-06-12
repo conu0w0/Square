@@ -14,7 +14,6 @@ let winCoords = null;
 function drawBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 格線與棋子
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       ctx.strokeStyle = "#aaa";
@@ -25,12 +24,10 @@ function drawBoard() {
     }
   }
 
-  // 下落中棋子
   if (fallingPiece) {
     drawPiece(fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
   }
 
-  // 勝利提示框框
   if (winCoords) {
     winCoords.forEach(([r, c]) => {
       ctx.strokeStyle = "gold";
@@ -80,7 +77,6 @@ canvas.addEventListener("click", (e) => {
 
   if (row === null) return;
 
-  // 動畫啟動
   fallingPiece = {
     col,
     row,
@@ -155,8 +151,18 @@ function resetGame() {
   drawBoard();
 }
 
+// ✅ 合併後的唯一 toggleRules 函數
 function toggleRules() {
-  document.getElementById("rules").classList.toggle("hidden");
+  const overlay = document.getElementById("overlay");
+  overlay.classList.toggle("hidden");
+}
+
+// ✅ 背景點擊時也能關閉
+function closeRules(event) {
+  const overlay = document.getElementById("overlay");
+  if (event.target === overlay) {
+    overlay.classList.add("hidden");
+  }
 }
 
 resetGame();
