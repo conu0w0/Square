@@ -16,8 +16,13 @@ function drawBoard() {
 
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
+      // 👇 確保格線乾淨不受陰影影響
+      ctx.save();
+      ctx.shadowColor = "transparent";
       ctx.strokeStyle = "#aaa";
+      ctx.lineWidth = 1;
       ctx.strokeRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      ctx.restore();
 
       const piece = board[r][c];
       if (piece) drawPiece(c, r, piece);
@@ -28,7 +33,7 @@ function drawBoard() {
     drawPiece(fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
   }
 
-    if (winCoords) {
+  if (winCoords) {
     winCoords.forEach(([r, c]) => {
       ctx.strokeStyle = "gold";
       ctx.lineWidth = 4;
