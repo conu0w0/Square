@@ -35,7 +35,13 @@ function dropPiece(col) {
     if (!board[r][col]) {
       board[r][col] = currentPlayer;
       updateCell(r, col, currentPlayer);
-      if (checkForSquareWin(currentPlayer)) {
+
+      const winCoords = checkForSquareWin(currentPlayer);
+      if (winCoords) {
+        winCoords.forEach(([r, c]) => {
+          const index = r * COLS + c;
+          game.children[index].classList.add("win");
+        });
         status.textContent = `玩家 ${currentPlayer === "red" ? "🟥" : "🟦"} 獲勝！`;
         gameOver = true;
       } else if (isBoardFull()) {
@@ -70,12 +76,17 @@ function checkForSquareWin(player) {
           board[r + size - 1][c] === player &&
           board[r + size - 1][c + size - 1] === player
         ) {
-          return true;
+          return [
+            [r, c],
+            [r, c + size - 1],
+            [r + size - 1, c],
+            [r + size - 1, c + size - 1]
+          ];
         }
       }
     }
   }
-  return false;
+  return null;
 }
 
 game.addEventListener("click", (e) => {
