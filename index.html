@@ -3,14 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>正方形四子棋 🟦🟥</title>
+  <title>Square</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>正方形四子棋 🟦🟥</h1>
+  <div class="top-bar">
+    <h1>Square</h1>
+    <button class="info-btn" onclick="toggleRules()">？</button>
+  </div>
+
+  <div id="rules" class="rules hidden">
+    <p>遊戲規則：</p>
+    <ul>
+      <li>玩家輪流在欄位中放入棋子，棋子會從上方掉下堆疊。</li>
+      <li>當玩家的棋子在棋盤上形成一個「正方形」，即四個角都是同一方，就會獲勝！</li>
+      <li>正方形大小不限，2x2、3x3、4x4 都算，只要四角落是自己的棋子！</li>
+    </ul>
+  </div>
+
   <div id="game"></div>
   <p id="status">輪到玩家 🟥</p>
-  <button onclick="resetGame()">重新開始</button>
+  <button class="reset-btn" onclick="resetGame()">🔄</button>
+
   <script src="script.js"></script>
 </body>
 </html>
