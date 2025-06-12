@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Square - Canvas 版</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Square</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&family=Poppins&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="top-bar">
@@ -14,17 +14,23 @@
     <button class="info-btn" onclick="toggleRules()">？</button>
   </div>
 
-  <div id="rules" class="rules hidden">
-    <p>遊戲規則：</p>
-    <ul>
-      <li>玩家輪流點欄位，棋子從上方掉下來堆疊。</li>
-      <li>形成一個「四角為同一方棋子」的正方形即可獲勝。</li>
-    </ul>
+  <!-- 背景遮罩與規則浮窗 -->
+  <div id="overlay" class="overlay hidden" onclick="closeRules(event)">
+    <div id="rules" class="rules-popup" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="toggleRules()">×</button>
+      <p>🎮 遊戲規則：</p>
+      <ul>
+        <li>玩家輪流點擊欄位，棋子從上方掉落。</li>
+        <li>當同一方棋子佔據正方形四角時，獲勝！</li>
+        <li>任意大小正方形皆可（2x2、3x3…）。</li>
+        <li>棋盤滿格即為平手。</li>
+      </ul>
+    </div>
   </div>
 
-  <canvas id="gameCanvas" width="420" height="360"></canvas>
+  <canvas id="gameCanvas" width="420" height="360" style="max-width: 100%; height: auto;"></canvas>
   <p id="status">輪到玩家 🟥</p>
 
-  <script src="script.js"></script>
+  <script src="canvas.js"></script>
 </body>
 </html>
