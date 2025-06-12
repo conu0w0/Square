@@ -57,3 +57,42 @@ h1 {
   cursor: pointer;
   margin-top: 15px;
 }
+#game {
+  display: grid;
+  grid-template-columns: repeat(7, 60px);
+  gap: 5px;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.cell {
+  width: 60px;
+  height: 60px;
+  background-color: #ddd;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.cell.red {
+  background-color: #e74c3c;
+}
+
+.cell.blue {
+  background-color: #3498db;
+}
+
+.cell.win {
+  outline: 3px solid gold;
+  box-shadow: 0 0 10px gold;
+}
+
+.cell.preview.red {
+  background-color: rgba(231, 76, 60, 0.6);
+}
+
+.cell.preview.blue {
+  background-color: rgba(52, 152, 219, 0.6);
+}
