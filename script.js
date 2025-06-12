@@ -16,7 +16,6 @@ function drawBoard() {
 
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      // 👇 確保格線乾淨不受陰影影響
       ctx.save();
       ctx.shadowColor = "transparent";
       ctx.strokeStyle = "#aaa";
@@ -77,6 +76,7 @@ function drawPiece(col, row, color) {
 }
 
 function roundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
   ctx.moveTo(x + radius, y);
   ctx.lineTo(x + width - radius, y);
   ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
