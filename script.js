@@ -28,11 +28,16 @@ function drawBoard() {
     drawPiece(fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
   }
 
-  if (winCoords) {
+    if (winCoords) {
     winCoords.forEach(([r, c]) => {
       ctx.strokeStyle = "gold";
       ctx.lineWidth = 4;
-      ctx.strokeRect(c * CELL_SIZE + 3, r * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6);
+      const x = c * CELL_SIZE + 5;
+      const y = r * CELL_SIZE + 5;
+      const size = CELL_SIZE - 10;
+      ctx.beginPath();
+      roundRect(ctx, x, y, size, size, 12);
+      ctx.stroke();
     });
   }
 }
@@ -41,11 +46,29 @@ function drawPiece(col, row, color) {
   const x = col * CELL_SIZE + 5;
   const y = row * CELL_SIZE + 5;
   const size = CELL_SIZE - 10;
+  const radius = 12;
 
-  ctx.fillStyle = color === "red" ? "#e74c3c" : "#3498db";
+  // 建立漸層填色
+  const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
+  if (color === "red") {
+    gradient.addColorStop(0, "#ff6b6b");
+    gradient.addColorStop(1, "#c0392b");
+  } else {
+    gradient.addColorStop(0, "#74b9ff");
+    gradient.addColorStop(1, "#2980b9");
+  }
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.3)";
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+
+  ctx.fillStyle = gradient;
   ctx.beginPath();
-  roundRect(ctx, x, y, size, size, 12);
+  roundRect(ctx, x, y, size, size, radius);
   ctx.fill();
+  ctx.restore();
 }
 
 function roundRect(ctx, x, y, width, height, radius) {
