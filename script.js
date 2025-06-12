@@ -7,6 +7,11 @@ let gameOver = false;
 const game = document.getElementById("game");
 const status = document.getElementById("status");
 
+function toggleRules() {
+  const ruleBox = document.getElementById("rules");
+  ruleBox.classList.toggle("hidden");
+}
+
 function createBoard() {
   board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
   game.innerHTML = "";
