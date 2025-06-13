@@ -8,13 +8,18 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="top-bar">
-    <button class="reset-btn" onclick="resetGame()">🔄</button>
+  <div class="game-wrapper">
+    <div class="top-bar">
+      <button class="reset-btn" onclick="resetGame()">🔄</button>
       <h1>Square</h1>
-    <div style="display: flex; gap: 6px;">
-      <button class="theme-btn" onclick="toggleTheme()">🌙</button>
-      <button class="info-btn" onclick="toggleRules()">？</button>
+      <div style="display: flex; gap: 6px;">
+        <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+        <button class="info-btn" onclick="toggleRules()">？</button>
     </div>
+  </div>
+
+    <canvas id="gameCanvas" width="420" height="360" style="max-width: 100%; height: auto;"></canvas>
+    <p id="status">輪到玩家 🟥</p>
   </div>
 
   <!-- 背景遮罩與規則浮窗 -->
@@ -30,9 +35,6 @@
       </ul>
     </div>
   </div>
-
-  <canvas id="gameCanvas" width="420" height="360" style="max-width: 100%; height: auto;"></canvas>
-  <p id="status">輪到玩家 🟥</p>
 
   <script src="script.js"></script>
 </body>
