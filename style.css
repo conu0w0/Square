@@ -1,15 +1,17 @@
 body {
   font-family: "Noto Sans TC", "Poppins", "Arial", sans-serif;
+  background-color: #f9f9f9;
+  color: #111;
+  margin: 0;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  margin: 0;
-  padding: 10px;
-  background-color: #f0f0f0;
 }
 
+/* 主體上方欄 */
 .top-bar {
   width: 100%;
   max-width: 440px;
@@ -17,8 +19,13 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  padding: 8px 12px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
 }
 
+/* 標題文字 */
 h1 {
   font-size: 2.2rem;
   margin: 0;
@@ -26,35 +33,25 @@ h1 {
   text-align: center;
 }
 
+/* 所有按鈕通用樣式 */
 .reset-btn,
 .info-btn,
-.close-btn{
+.theme-btn,
+.close-btn {
   width: 40px;
   height: 40px;
   font-size: 20px;
   border-radius: 50%;
   border: none;
   background-color: #fff;
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  color: #111;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.theme-btn {
-  width: 40px;
-  height: 40px;
-  font-size: 20px;
-  border-radius: 50%;
-  border: none;
-  background-color: #fff;
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-body.dark .theme-btn {
-  background-color: #444;
-  color: #fff;
+button:hover {
+  transform: scale(1.05);
 }
 
 #status {
@@ -62,16 +59,16 @@ body.dark .theme-btn {
   font-size: 1.1rem;
 }
 
+/* 勝利閃爍動畫 */
 .blink {
   animation: blink 1s infinite;
 }
-
 @keyframes blink {
   0%, 100% { background-color: #fff; }
   50% { background-color: #ffe066; }
 }
 
-/* 規則浮窗覆蓋 */
+/* 彈窗樣式 */
 .overlay {
   position: fixed;
   top: 0;
@@ -87,12 +84,13 @@ body.dark .theme-btn {
 }
 
 .rules-popup {
-  background: white;
+  background: #fff;
+  color: #111;
   padding: 20px;
   border-radius: 16px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.25);
+  box-shadow: 0 0 20px rgba(0,0,0,0.15);
   position: relative;
   font-size: 1rem;
   line-height: 1.5;
@@ -102,7 +100,6 @@ body.dark .theme-btn {
   margin: 0 0 10px;
   font-weight: bold;
 }
-
 .rules-popup ul {
   padding-left: 20px;
   margin: 0;
@@ -122,6 +119,32 @@ body.dark .theme-btn {
   display: none;
 }
 
+/* 暗色主題切換（由 JS 加上 body.dark 控制） */
+body.dark {
+  background-color: #121212;
+  color: #eee;
+}
+
+body.dark .top-bar {
+  background-color: #1e1e1e;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+body.dark .reset-btn,
+body.dark .info-btn,
+body.dark .theme-btn,
+body.dark .close-btn {
+  background-color: #2a2a2a;
+  color: #eee;
+  box-shadow: 0 1px 4px rgba(255, 255, 255, 0.05);
+}
+
+body.dark .rules-popup {
+  background-color: #1e1e1e;
+  color: #eee;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
 /* 響應式 */
 @media (max-width: 480px) {
   h1 {
@@ -129,20 +152,5 @@ body.dark .theme-btn {
   }
   #status {
     font-size: 1rem;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #1e1e1e;
-    color: #eee;
-  }
-  .top-bar, .rules-popup {
-    background-color: #2a2a2a;
-    color: #eee;
-  }
-  .reset-btn, .info-btn, .close-btn {
-    background-color: #444;
-    color: #fff;
   }
 }
