@@ -10,14 +10,14 @@
 <body>
   <div class="game-wrapper">
     <div class="top-bar">
+      <button class="home-btn" onclick="goHome()">🏠</button>
       <button class="reset-btn" onclick="resetGame()">🔄</button>
       <h1>Square</h1>
       <div style="display: flex; gap: 6px;">
         <button class="theme-btn" onclick="toggleTheme()">🌙</button>
         <button class="info-btn" onclick="toggleRules()">？</button>
+      </div>
     </div>
-  </div>
-
     <canvas id="gameCanvas" width="420" height="360" style="max-width: 100%; height: auto;"></canvas>
     <p id="status">輪到玩家 🟥</p>
   </div>
