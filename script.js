@@ -43,14 +43,20 @@ function drawBoard() {
       ctx.restore();
 
       const piece = board[r][c];
-      if (piece) drawPiece(offsetX + c, r, piece);
+      if (piece) {
+        const x = offsetX + c * CELL_SIZE + 5;
+        const y = r * CELL_SIZE + 5;
+        drawPiece(x, y, piece);
+      }
     }
   }
 
   if (hoverCol !== null && !fallingPiece && !gameOver && currentPlayer === "red") {
     const row = getAvailableRow(hoverCol);
     if (row !== null) {
-      drawPiece(offsetX + hoverCol, row, currentPlayer, true);
+      const x = offsetX + hoverCol * CELL_SIZE + 5;
+      const y = row * CELL_SIZE + 5;
+      drawPiece(x, y, currentPlayer, true);
     }
   }
 
@@ -68,15 +74,15 @@ function drawBoard() {
   }
 
   if (fallingPiece) {
-    drawPiece(offsetX + fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
+    const x = offsetX + fallingPiece.col * CELL_SIZE + 5;
+    const y = fallingPiece.y + 5;
+    drawPiece(x, y, fallingPiece.color);
   }
 
   drawBottomStatus(offsetX);
 }
 
-function drawPiece(col, row, color, preview = false) {
-  const x = col * CELL_SIZE + 5;
-  const y = row * CELL_SIZE + 5;
+function drawPiece(x, y, color, preview = false) {
   const size = CELL_SIZE - 10;
   const radius = 12;
 
@@ -162,17 +168,13 @@ function animateDrop() {
     board[fallingPiece.row][fallingPiece.col] = fallingPiece.color;
     fallingPiece = null;
     if (checkForSquareWin(currentPlayer)) {
-      document.getElementById("status").textContent = `玩家 ${currentPlayer === "red" ? "🟥" : "🟦"} 獲勝！`;
       gameOver = true;
       document.querySelector(".reset-btn").classList.add("blink");
     } else if (isBoardFull()) {
-      document.getElementById("status").textContent = "平手！";
       gameOver = true;
       document.querySelector(".reset-btn").classList.add("blink");
     } else {
       currentPlayer = currentPlayer === "red" ? "blue" : "red";
-      document.getElementById("status").textContent =
-        currentPlayer === "red" ? "輪到玩家 🟥" : "汪汪正在思考…";
       if (currentPlayer === "blue") scheduleAiMove();
     }
   }
@@ -239,12 +241,9 @@ function resetGame() {
   counter = 0;
 
   currentPlayer = Math.random() < 0.5 ? "red" : "blue";
-  document.getElementById("status").textContent =
-    currentPlayer === "red" ? "輪到玩家 🟥" : "汪汪先手中…";
   document.querySelector(".reset-btn").classList.remove("blink");
 
   drawBoard();
-
   if (currentPlayer === "blue") scheduleAiMove();
 }
 
