@@ -4,6 +4,14 @@ const ctx = canvas.getContext("2d");
 const COLS = 7;
 const ROWS = 6;
 const CELL_SIZE = 60;
+const STATUS_HEIGHT = 80;
+const BOARD_WIDTH = COLS * CELL_SIZE;
+const BOARD_HEIGHT = ROWS * CELL_SIZE;
+const CANVAS_WIDTH = BOARD_WIDTH;
+const CANVAS_HEIGHT = BOARD_HEIGHT + STATUS_HEIGHT;
+
+canvas.width = CANVAS_WIDTH;
+canvas.height = CANVAS_HEIGHT;
 
 let board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
 let currentPlayer = "red";
@@ -23,24 +31,26 @@ function goHome() {
 function drawBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       ctx.save();
       ctx.shadowColor = "transparent";
       ctx.strokeStyle = "#aaa";
       ctx.lineWidth = 1;
-      ctx.strokeRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      ctx.strokeRect(offsetX + c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       ctx.restore();
 
       const piece = board[r][c];
-      if (piece) drawPiece(c, r, piece);
+      if (piece) drawPiece(offsetX + c, r, piece);
     }
   }
 
   if (hoverCol !== null && !fallingPiece && !gameOver && currentPlayer === "red") {
     const row = getAvailableRow(hoverCol);
     if (row !== null) {
-      drawPiece(hoverCol, row, currentPlayer, true);
+      drawPiece(offsetX + hoverCol, row, currentPlayer, true);
     }
   }
 
@@ -48,7 +58,7 @@ function drawBoard() {
     winCoords.forEach(([r, c]) => {
       ctx.strokeStyle = "gold";
       ctx.lineWidth = 4;
-      const x = c * CELL_SIZE + 5;
+      const x = offsetX + c * CELL_SIZE + 5;
       const y = r * CELL_SIZE + 5;
       const size = CELL_SIZE - 10;
       ctx.beginPath();
@@ -58,10 +68,10 @@ function drawBoard() {
   }
 
   if (fallingPiece) {
-    drawPiece(fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
+    drawPiece(offsetX + fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
   }
 
-  drawBottomStatus();
+  drawBottomStatus(offsetX);
 }
 
 function drawPiece(col, row, color, preview = false) {
@@ -121,10 +131,11 @@ function getAvailableRow(col) {
 canvas.addEventListener("click", (e) => {
   if (gameOver || fallingPiece || currentPlayer !== "red") return;
   const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+  const x = e.clientX - rect.left - offsetX;
   const col = Math.floor(x / CELL_SIZE);
   const row = getAvailableRow(col);
-  if (row === null) return;
+  if (row === null || col < 0 || col >= COLS) return;
   fallingPiece = { col, row, y: 0, color: "red" };
   animateDrop();
 });
@@ -132,8 +143,10 @@ canvas.addEventListener("click", (e) => {
 canvas.addEventListener("mousemove", (e) => {
   if (gameOver || fallingPiece || currentPlayer !== "red") return;
   const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  hoverCol = Math.floor(x / CELL_SIZE);
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+  const x = e.clientX - rect.left - offsetX;
+  const col = Math.floor(x / CELL_SIZE);
+  hoverCol = (col >= 0 && col < COLS) ? col : null;
   drawBoard();
 });
 
@@ -225,9 +238,7 @@ function resetGame() {
   blink_interval = 120 + Math.floor(Math.random() * 180);
   counter = 0;
 
-  const playerFirst = Math.random() < 0.5;
-  currentPlayer = playerFirst ? "red" : "blue";
-
+  currentPlayer = Math.random() < 0.5 ? "red" : "blue";
   document.getElementById("status").textContent =
     currentPlayer === "red" ? "輪到玩家 🟥" : "汪汪先手中…";
   document.querySelector(".reset-btn").classList.remove("blink");
@@ -262,25 +273,22 @@ function toggleTheme() {
   applyTheme(theme);
 })();
 
-function drawBottomStatus() {
-  const baseY = CELL_SIZE * ROWS + 10;
+function drawBottomStatus(offsetX) {
+  const baseY = BOARD_HEIGHT + 10;
 
-  // 玩家頭像
   ctx.save();
   ctx.globalAlpha = currentPlayer === "red" ? 1 : 0.3;
   ctx.fillStyle = "#ff6b6b";
   ctx.beginPath();
-  ctx.arc(50, baseY + 20, 20, 0, Math.PI * 2);
+  ctx.arc(offsetX + 30, baseY + 20, 20, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
-  // AI 汪汪臉
   ctx.save();
   ctx.globalAlpha = currentPlayer === "blue" ? 1 : 0.3;
-  drawCatFace({ x: 370, y: baseY + 20, r: 20, pat: 0 }, { col: "#74b9ff" });
+  drawCatFace({ x: offsetX + BOARD_WIDTH - 30, y: baseY + 20, r: 20, pat: 0 }, { col: "#74b9ff" });
   ctx.restore();
 
-  // 中央文字
   ctx.save();
   ctx.font = "16px 'Noto Sans TC'";
   ctx.fillStyle = "#333";
