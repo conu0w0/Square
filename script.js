@@ -7,11 +7,8 @@ const CELL_SIZE = 60;
 const STATUS_HEIGHT = 80;
 const BOARD_WIDTH = COLS * CELL_SIZE;
 const BOARD_HEIGHT = ROWS * CELL_SIZE;
-const CANVAS_WIDTH = BOARD_WIDTH;
-const CANVAS_HEIGHT = BOARD_HEIGHT + STATUS_HEIGHT;
-
-canvas.width = CANVAS_WIDTH;
-canvas.height = CANVAS_HEIGHT;
+canvas.width = BOARD_WIDTH;
+canvas.height = BOARD_HEIGHT + STATUS_HEIGHT;
 
 let board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
 let currentPlayer = "red";
@@ -23,6 +20,7 @@ let blink_counter = 0;
 let blink_timer = 0;
 let blink_interval = 120 + Math.floor(Math.random() * 180);
 let counter = 0;
+let facePat = 0;
 
 function goHome() {
   window.location.href = "https://github.com/conu0w0/Square";
@@ -30,7 +28,6 @@ function goHome() {
 
 function drawBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   const offsetX = (canvas.width - BOARD_WIDTH) / 2;
 
   for (let r = 0; r < ROWS; r++) {
@@ -43,21 +40,13 @@ function drawBoard() {
       ctx.restore();
 
       const piece = board[r][c];
-      if (piece) {
-        const x = offsetX + c * CELL_SIZE + 5;
-        const y = r * CELL_SIZE + 5;
-        drawPiece(x, y, piece);
-      }
+      if (piece) drawPiece(offsetX + c, r, piece);
     }
   }
 
   if (hoverCol !== null && !fallingPiece && !gameOver && currentPlayer === "red") {
     const row = getAvailableRow(hoverCol);
-    if (row !== null) {
-      const x = offsetX + hoverCol * CELL_SIZE + 5;
-      const y = row * CELL_SIZE + 5;
-      drawPiece(x, y, currentPlayer, true);
-    }
+    if (row !== null) drawPiece(offsetX + hoverCol, row, currentPlayer, true);
   }
 
   if (winCoords) {
@@ -74,31 +63,25 @@ function drawBoard() {
   }
 
   if (fallingPiece) {
-    const x = offsetX + fallingPiece.col * CELL_SIZE + 5;
-    const y = fallingPiece.y + 5;
-    drawPiece(x, y, fallingPiece.color);
+    drawPiece(offsetX + fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
   }
 
   drawBottomStatus(offsetX);
 }
 
-function drawPiece(x, y, color, preview = false) {
+function drawPiece(col, row, color, preview = false) {
+  const x = col * CELL_SIZE + 5;
+  const y = row * CELL_SIZE + 5;
   const size = CELL_SIZE - 10;
   const radius = 12;
-
   const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
-  if (color === "red") {
-    gradient.addColorStop(0, "#ff6b6b");
-    gradient.addColorStop(1, "#c0392b");
-  } else {
-    gradient.addColorStop(0, "#74b9ff");
-    gradient.addColorStop(1, "#2980b9");
-  }
+
+  gradient.addColorStop(0, color === "red" ? "#ff6b6b" : "#74b9ff");
+  gradient.addColorStop(1, color === "red" ? "#c0392b" : "#2980b9");
 
   ctx.save();
-  if (preview) {
-    ctx.globalAlpha = 0.4;
-  } else {
+  if (preview) ctx.globalAlpha = 0.4;
+  else {
     const isDark = document.body.classList.contains("dark");
     ctx.shadowColor = isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)";
     ctx.shadowBlur = 6;
@@ -242,41 +225,23 @@ function resetGame() {
 
   currentPlayer = Math.random() < 0.5 ? "red" : "blue";
   document.querySelector(".reset-btn").classList.remove("blink");
-
   drawBoard();
+
   if (currentPlayer === "blue") scheduleAiMove();
 }
 
-function toggleRules() {
-  document.getElementById("overlay").classList.toggle("hidden");
-}
-function closeRules(e) {
-  if (e.target === document.getElementById("overlay")) {
-    document.getElementById("overlay").classList.add("hidden");
-  }
-}
-
-function applyTheme(theme) {
-  document.body.classList.toggle("dark", theme === "dark");
-  document.querySelector(".theme-btn").textContent = theme === "dark" ? "🌞" : "🌙";
-  localStorage.setItem("theme", theme);
-}
-function toggleTheme() {
-  const isDark = document.body.classList.contains("dark");
-  applyTheme(isDark ? "light" : "dark");
-}
-(function () {
-  const storedTheme = localStorage.getItem("theme");
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const theme = storedTheme || (prefersDark ? "dark" : "light");
-  applyTheme(theme);
-})();
-
 function drawBottomStatus(offsetX) {
   const baseY = BOARD_HEIGHT + 10;
+  const msg = gameOver
+    ? currentPlayer === "red"
+      ? "你贏啦 🎉"
+      : "汪汪勝出！"
+    : currentPlayer === "red"
+    ? "輪到你囉！"
+    : "汪汪正在思考…";
 
   ctx.save();
-  ctx.globalAlpha = currentPlayer === "red" ? 1 : 0.3;
+  ctx.globalAlpha = currentPlayer === "red" || gameOver ? 1 : 0.3;
   ctx.fillStyle = "#ff6b6b";
   ctx.beginPath();
   ctx.arc(offsetX + 30, baseY + 20, 20, 0, Math.PI * 2);
@@ -284,19 +249,15 @@ function drawBottomStatus(offsetX) {
   ctx.restore();
 
   ctx.save();
-  ctx.globalAlpha = currentPlayer === "blue" ? 1 : 0.3;
-  drawCatFace({ x: offsetX + BOARD_WIDTH - 30, y: baseY + 20, r: 20, pat: 0 }, { col: "#74b9ff" });
+  ctx.globalAlpha = currentPlayer === "blue" || gameOver ? 1 : 0.3;
+  drawCatFace({ x: offsetX + BOARD_WIDTH - 30, y: baseY + 20, r: 20, pat: facePat }, { col: "#74b9ff" });
   ctx.restore();
 
   ctx.save();
   ctx.font = "16px 'Noto Sans TC'";
   ctx.fillStyle = "#333";
   ctx.textAlign = "center";
-  ctx.fillText(
-    currentPlayer === "red" ? "輪到你囉！" : "汪汪正在思考…",
-    canvas.width / 2,
-    baseY + 25
-  );
+  ctx.fillText(msg, canvas.width / 2, baseY + 25);
   ctx.restore();
 }
 
@@ -305,7 +266,6 @@ function drawCatFace(face, resetbutton) {
   ctx.lineWidth = 2;
   ctx.strokeStyle = resetbutton.col;
   ctx.fillStyle = resetbutton.col;
-
   ctx.beginPath();
   roundRect(ctx, x - size / 2, y - size / 2, size, size, r);
   ctx.fill();
