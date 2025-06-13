@@ -80,7 +80,8 @@ function drawPiece(col, row, color, preview = false) {
   if (preview) {
     ctx.globalAlpha = 0.4;
   } else {
-    ctx.shadowColor = "rgba(0,0,0,0.3)";
+    const isDark = document.body.classList.contains("dark");
+    ctx.shadowColor = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.3)";
     ctx.shadowBlur = 6;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
