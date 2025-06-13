@@ -10,6 +10,7 @@ let currentPlayer = "red";
 let gameOver = false;
 let fallingPiece = null;
 let winCoords = null;
+let hoverCol = null;
 
 function drawBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -28,10 +29,15 @@ function drawBoard() {
     }
   }
 
-  if (fallingPiece) {
-    drawPiece(fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
+  // 預覽棋子（滑鼠懸停）
+  if (hoverCol !== null && !fallingPiece && !gameOver) {
+    const row = getAvailableRow(hoverCol);
+    if (row !== null) {
+      drawPiece(hoverCol, row, currentPlayer, true);
+    }
   }
 
+  // 掃描獲勝位置
   if (winCoords) {
     winCoords.forEach(([r, c]) => {
       ctx.strokeStyle = "gold";
@@ -44,15 +50,19 @@ function drawBoard() {
       ctx.stroke();
     });
   }
+
+  // 掉落動畫
+  if (fallingPiece) {
+    drawPiece(fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
+  }
 }
 
-function drawPiece(col, row, color) {
+function drawPiece(col, row, color, preview = false) {
   const x = col * CELL_SIZE + 5;
   const y = row * CELL_SIZE + 5;
   const size = CELL_SIZE - 10;
   const radius = 12;
 
-  // 建立漸層填色
   const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
   if (color === "red") {
     gradient.addColorStop(0, "#ff6b6b");
@@ -63,10 +73,14 @@ function drawPiece(col, row, color) {
   }
 
   ctx.save();
-  ctx.shadowColor = "rgba(0,0,0,0.3)";
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 2;
+  if (preview) {
+    ctx.globalAlpha = 0.4;
+  } else {
+    ctx.shadowColor = "rgba(0,0,0,0.3)";
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+  }
 
   ctx.fillStyle = gradient;
   ctx.beginPath();
@@ -113,6 +127,19 @@ canvas.addEventListener("click", (e) => {
   };
 
   animateDrop();
+});
+
+canvas.addEventListener("mousemove", (e) => {
+  if (gameOver || fallingPiece) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  hoverCol = Math.floor(x / CELL_SIZE);
+  drawBoard();
+});
+
+canvas.addEventListener("mouseleave", () => {
+  hoverCol = null;
+  drawBoard();
 });
 
 function animateDrop() {
@@ -174,23 +201,41 @@ function resetGame() {
   currentPlayer = "red";
   gameOver = false;
   winCoords = null;
+  fallingPiece = null;
+  hoverCol = null;
   document.getElementById("status").textContent = "輪到玩家 🟥";
   document.querySelector(".reset-btn").classList.remove("blink");
   drawBoard();
 }
 
-// ✅ 合併後的唯一 toggleRules 函數
+// toggleRules 和 closeRules 維持不變
 function toggleRules() {
   const overlay = document.getElementById("overlay");
   overlay.classList.toggle("hidden");
 }
-
-// ✅ 背景點擊時也能關閉
 function closeRules(event) {
   const overlay = document.getElementById("overlay");
   if (event.target === overlay) {
     overlay.classList.add("hidden");
   }
 }
+
+// 🌙/🌞 主題切換功能
+function applyTheme(theme) {
+  document.body.classList.toggle("dark", theme === "dark");
+  const btn = document.querySelector(".theme-btn");
+  btn.textContent = theme === "dark" ? "🌞" : "🌙";
+  localStorage.setItem("theme", theme);
+}
+function toggleTheme() {
+  const isDark = document.body.classList.contains("dark");
+  applyTheme(isDark ? "light" : "dark");
+}
+(function () {
+  const storedTheme = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const theme = storedTheme || (prefersDark ? "dark" : "light");
+  applyTheme(theme);
+})();
 
 resetGame();
