@@ -22,7 +22,7 @@ body {
 /* 主體上方欄 */
 .top-bar {
   width: 100%;
-  max-width: 440px;
+  max-width: 420px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -31,6 +31,7 @@ body {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 /* 標題文字 */
