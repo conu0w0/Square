@@ -10,10 +10,12 @@
 <body>
   <div class="game-wrapper">
     <div class="top-bar">
-      <button class="home-btn" onclick="goHome()">🏠</button>
-      <button class="reset-btn" onclick="resetGame()">🔄</button>
+      <div class="left-buttons" style="display: flex; gap: 6px;">
+        <button class="home-btn" onclick="goHome()">🏠</button>
+        <button class="reset-btn" onclick="resetGame()">🔄</button>
+      </div>
       <h1>Square</h1>
-      <div style="display: flex; gap: 6px;">
+      <div class="right-buttons" style="display: flex; gap: 6px;">
         <button class="theme-btn" onclick="toggleTheme()">🌙</button>
         <button class="info-btn" onclick="toggleRules()">？</button>
       </div>
