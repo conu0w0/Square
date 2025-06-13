@@ -84,7 +84,7 @@ function drawPiece(col, row, color, preview = false) {
     ctx.globalAlpha = 0.4;
   } else {
     const isDark = document.body.classList.contains("dark");
-    ctx.shadowColor = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.3)";
+    ctx.shadowColor = isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)";
     ctx.shadowBlur = 6;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
@@ -159,7 +159,7 @@ function animateDrop() {
     } else {
       currentPlayer = currentPlayer === "red" ? "blue" : "red";
       document.getElementById("status").textContent =
-        currentPlayer === "red" ? "輪到您了！" : "汪汪正在思考…";
+        currentPlayer === "red" ? "輪到玩家 🟥" : "汪汪正在思考…";
       if (currentPlayer === "blue") scheduleAiMove();
     }
   }
@@ -229,7 +229,7 @@ function resetGame() {
   currentPlayer = playerFirst ? "red" : "blue";
 
   document.getElementById("status").textContent =
-    currentPlayer === "red" ? "輪到您了！" : "汪汪先手中…";
+    currentPlayer === "red" ? "輪到玩家 🟥" : "汪汪先手中…";
   document.querySelector(".reset-btn").classList.remove("blink");
 
   drawBoard();
@@ -265,7 +265,7 @@ function toggleTheme() {
 function drawBottomStatus() {
   const baseY = CELL_SIZE * ROWS + 10;
 
-  // 玩家圓形頭像
+  // 玩家頭像
   ctx.save();
   ctx.globalAlpha = currentPlayer === "red" ? 1 : 0.3;
   ctx.fillStyle = "#ff6b6b";
@@ -274,19 +274,19 @@ function drawBottomStatus() {
   ctx.fill();
   ctx.restore();
 
-  // AI 表情貓
+  // AI 汪汪臉
   ctx.save();
   ctx.globalAlpha = currentPlayer === "blue" ? 1 : 0.3;
   drawCatFace({ x: 370, y: baseY + 20, r: 20, pat: 0 }, { col: "#74b9ff" });
   ctx.restore();
 
-  // 中間狀態文字
+  // 中央文字
   ctx.save();
   ctx.font = "16px 'Noto Sans TC'";
   ctx.fillStyle = "#333";
   ctx.textAlign = "center";
   ctx.fillText(
-    currentPlayer === "red" ? "輪到您了！" : "汪汪正在思考…",
+    currentPlayer === "red" ? "輪到你囉！" : "汪汪正在思考…",
     canvas.width / 2,
     baseY + 25
   );
@@ -299,7 +299,9 @@ function drawCatFace(face, resetbutton) {
   ctx.strokeStyle = resetbutton.col;
   ctx.fillStyle = resetbutton.col;
 
-  draw_round_rect(x - size / 2, y - size / 2, size, size, r, resetbutton.col);
+  ctx.beginPath();
+  roundRect(ctx, x - size / 2, y - size / 2, size, size, r);
+  ctx.fill();
   ctx.stroke();
 
   ctx.beginPath();
