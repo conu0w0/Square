@@ -11,6 +11,10 @@ let gameOver = false;
 let fallingPiece = null;
 let winCoords = null;
 let hoverCol = null;
+let blink_counter = 0;
+let blink_timer = 0;
+let blink_interval = 120 + Math.floor(Math.random() * 180);
+let counter = 0;
 
 function goHome() {
   window.location.href = "https://github.com/conu0w0/Square";
@@ -33,15 +37,13 @@ function drawBoard() {
     }
   }
 
-  // 預覽棋子（滑鼠懸停）
-  if (hoverCol !== null && !fallingPiece && !gameOver) {
+  if (hoverCol !== null && !fallingPiece && !gameOver && currentPlayer === "red") {
     const row = getAvailableRow(hoverCol);
     if (row !== null) {
       drawPiece(hoverCol, row, currentPlayer, true);
     }
   }
 
-  // 掃描獲勝位置
   if (winCoords) {
     winCoords.forEach(([r, c]) => {
       ctx.strokeStyle = "gold";
@@ -55,10 +57,11 @@ function drawBoard() {
     });
   }
 
-  // 掉落動畫
   if (fallingPiece) {
     drawPiece(fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
   }
+
+  drawBottomStatus();
 }
 
 function drawPiece(col, row, color, preview = false) {
@@ -94,17 +97,18 @@ function drawPiece(col, row, color, preview = false) {
   ctx.restore();
 }
 
-function roundRect(ctx, x, y, width, height, radius) {
+function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
 }
 
 function getAvailableRow(col) {
@@ -115,27 +119,18 @@ function getAvailableRow(col) {
 }
 
 canvas.addEventListener("click", (e) => {
-  if (gameOver || fallingPiece) return;
-
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const col = Math.floor(x / CELL_SIZE);
   const row = getAvailableRow(col);
-
   if (row === null) return;
-
-  fallingPiece = {
-    col,
-    row,
-    y: 0,
-    color: currentPlayer,
-  };
-
+  fallingPiece = { col, row, y: 0, color: "red" };
   animateDrop();
 });
 
 canvas.addEventListener("mousemove", (e) => {
-  if (gameOver || fallingPiece) return;
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   hoverCol = Math.floor(x / CELL_SIZE);
@@ -149,12 +144,10 @@ canvas.addEventListener("mouseleave", () => {
 
 function animateDrop() {
   if (!fallingPiece) return;
-
   fallingPiece.y += 10;
   if (fallingPiece.y / CELL_SIZE >= fallingPiece.row) {
     board[fallingPiece.row][fallingPiece.col] = fallingPiece.color;
     fallingPiece = null;
-
     if (checkForSquareWin(currentPlayer)) {
       document.getElementById("status").textContent = `玩家 ${currentPlayer === "red" ? "🟥" : "🟦"} 獲勝！`;
       gameOver = true;
@@ -165,12 +158,32 @@ function animateDrop() {
       document.querySelector(".reset-btn").classList.add("blink");
     } else {
       currentPlayer = currentPlayer === "red" ? "blue" : "red";
-      document.getElementById("status").textContent = `輪到玩家 ${currentPlayer === "red" ? "🟥" : "🟦"}`;
+      document.getElementById("status").textContent =
+        currentPlayer === "red" ? "輪到您了！" : "汪汪正在思考…";
+      if (currentPlayer === "blue") scheduleAiMove();
     }
   }
-
   drawBoard();
   if (fallingPiece) requestAnimationFrame(animateDrop);
+}
+
+function scheduleAiMove() {
+  const delay = 500 + Math.random() * 700;
+  setTimeout(aiMove, delay);
+}
+
+function aiMove() {
+  if (gameOver) return;
+  const options = [];
+  for (let c = 0; c < COLS; c++) {
+    if (getAvailableRow(c) !== null) options.push(c);
+  }
+  const col = options[Math.floor(Math.random() * options.length)];
+  const row = getAvailableRow(col);
+  if (row !== null) {
+    fallingPiece = { col, row, y: 0, color: "blue" };
+    animateDrop();
+  }
 }
 
 function checkForSquareWin(player) {
@@ -203,33 +216,39 @@ function isBoardFull() {
 
 function resetGame() {
   board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
-  currentPlayer = "red";
   gameOver = false;
   winCoords = null;
   fallingPiece = null;
   hoverCol = null;
-  document.getElementById("status").textContent = "輪到玩家 🟥";
+  blink_counter = 0;
+  blink_timer = 0;
+  blink_interval = 120 + Math.floor(Math.random() * 180);
+  counter = 0;
+
+  const playerFirst = Math.random() < 0.5;
+  currentPlayer = playerFirst ? "red" : "blue";
+
+  document.getElementById("status").textContent =
+    currentPlayer === "red" ? "輪到您了！" : "汪汪先手中…";
   document.querySelector(".reset-btn").classList.remove("blink");
+
   drawBoard();
+
+  if (currentPlayer === "blue") scheduleAiMove();
 }
 
-// toggleRules 和 closeRules 維持不變
 function toggleRules() {
-  const overlay = document.getElementById("overlay");
-  overlay.classList.toggle("hidden");
+  document.getElementById("overlay").classList.toggle("hidden");
 }
-function closeRules(event) {
-  const overlay = document.getElementById("overlay");
-  if (event.target === overlay) {
-    overlay.classList.add("hidden");
+function closeRules(e) {
+  if (e.target === document.getElementById("overlay")) {
+    document.getElementById("overlay").classList.add("hidden");
   }
 }
 
-// 🌙/🌞 主題切換功能
 function applyTheme(theme) {
   document.body.classList.toggle("dark", theme === "dark");
-  const btn = document.querySelector(".theme-btn");
-  btn.textContent = theme === "dark" ? "🌞" : "🌙";
+  document.querySelector(".theme-btn").textContent = theme === "dark" ? "🌞" : "🌙";
   localStorage.setItem("theme", theme);
 }
 function toggleTheme() {
@@ -242,5 +261,88 @@ function toggleTheme() {
   const theme = storedTheme || (prefersDark ? "dark" : "light");
   applyTheme(theme);
 })();
+
+function drawBottomStatus() {
+  const baseY = CELL_SIZE * ROWS + 10;
+
+  // 玩家圓形頭像
+  ctx.save();
+  ctx.globalAlpha = currentPlayer === "red" ? 1 : 0.3;
+  ctx.fillStyle = "#ff6b6b";
+  ctx.beginPath();
+  ctx.arc(50, baseY + 20, 20, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // AI 表情貓
+  ctx.save();
+  ctx.globalAlpha = currentPlayer === "blue" ? 1 : 0.3;
+  drawCatFace({ x: 370, y: baseY + 20, r: 20, pat: 0 }, { col: "#74b9ff" });
+  ctx.restore();
+
+  // 中間狀態文字
+  ctx.save();
+  ctx.font = "16px 'Noto Sans TC'";
+  ctx.fillStyle = "#333";
+  ctx.textAlign = "center";
+  ctx.fillText(
+    currentPlayer === "red" ? "輪到您了！" : "汪汪正在思考…",
+    canvas.width / 2,
+    baseY + 25
+  );
+  ctx.restore();
+}
+
+function drawCatFace(face, resetbutton) {
+  const x = face.x, y = face.y, size = face.r * 2, r = 20;
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = resetbutton.col;
+  ctx.fillStyle = resetbutton.col;
+
+  draw_round_rect(x - size / 2, y - size / 2, size, size, r, resetbutton.col);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x - size / 2 + 5, y - size / 2 + 15);
+  ctx.lineTo(x - size / 2 + 25, y - size / 2 - 15);
+  ctx.lineTo(x - size / 2 + 45, y - size / 2 + 15);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x + size / 2 - 5, y - size / 2 + 15);
+  ctx.lineTo(x + size / 2 - 25, y - size / 2 - 15);
+  ctx.lineTo(x + size / 2 - 45, y - size / 2 + 15);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  blink_timer++;
+  if (blink_timer > blink_interval) {
+    blink_counter++;
+    if (blink_counter > 6) {
+      blink_counter = 0;
+      blink_timer = 0;
+      blink_interval = 120 + Math.floor(Math.random() * 180);
+    }
+  }
+
+  if (blink_counter === 0) {
+    ctx.fillStyle = "#000";
+    ctx.beginPath(); ctx.arc(x - 13, y - 5, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 13, y - 5, 5, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.strokeStyle = "#000";
+    ctx.beginPath(); ctx.moveTo(x - 18, y - 5); ctx.lineTo(x - 8, y - 5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 8, y - 5); ctx.lineTo(x + 18, y - 5); ctx.stroke();
+  }
+
+  ctx.strokeStyle = "#000";
+  if (face.pat === 0) {
+    ctx.beginPath(); ctx.arc(x - 4, y + 10, 4, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x + 4, y + 10, 4, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
+  } else if (face.pat === 1) {
+    ctx.beginPath(); ctx.moveTo(x - 6, y + 8); ctx.lineTo(x + 6, y + 8); ctx.stroke();
+  } else if (face.pat === 2) {
+    ctx.beginPath(); ctx.arc(x, y + 10, 6, 0, Math.PI); ctx.stroke();
+  }
+}
 
 resetGame();
