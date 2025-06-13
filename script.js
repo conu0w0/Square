@@ -315,3 +315,23 @@ function drawCatFace(face, resetbutton) {
 }
 
 resetGame();
+
+function applyTheme(theme) {
+  document.body.classList.toggle("dark", theme === "dark");
+  const themeBtn = document.querySelector(".theme-btn");
+  if (themeBtn) themeBtn.textContent = theme === "dark" ? "🌞" : "🌙";
+  localStorage.setItem("theme", theme);
+}
+
+function toggleTheme() {
+  const isDark = document.body.classList.contains("dark");
+  applyTheme(isDark ? "light" : "dark");
+}
+
+// 初始載入時偵測主題
+(function () {
+  const storedTheme = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const theme = storedTheme || (prefersDark ? "dark" : "light");
+  applyTheme(theme);
+})();
