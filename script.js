@@ -15,6 +15,7 @@ let hoverCol = null;
 function goHome() {
   window.location.href = "https://github.com/conu0w0/Square";
 }
+
 function drawBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
