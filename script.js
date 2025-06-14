@@ -146,6 +146,69 @@ canvas.addEventListener("mouseleave", () => {
   drawBoard();
 });
 
+// 滑鼠點擊（電腦）
+canvas.addEventListener("click", (e) => {
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
+  const rect = canvas.getBoundingClientRect();
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+  const x = e.clientX - rect.left - offsetX;
+  const col = Math.floor(x / CELL_SIZE);
+  const row = getAvailableRow(col);
+  if (row === null || col < 0 || col >= COLS) return;
+  fallingPiece = { col, row, y: 0, color: "red" };
+  animateDrop();
+});
+
+// 滑鼠移動預覽（電腦 hover）
+canvas.addEventListener("mousemove", (e) => {
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
+  const rect = canvas.getBoundingClientRect();
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+  const x = e.clientX - rect.left - offsetX;
+  const col = Math.floor(x / CELL_SIZE);
+  hoverCol = (col >= 0 && col < COLS) ? col : null;
+  drawBoard();
+});
+
+// 滑鼠離開時清除 hover 預覽
+canvas.addEventListener("mouseleave", () => {
+  hoverCol = null;
+  drawBoard();
+});
+
+// 手指觸控移動（模擬 hover 預覽）
+canvas.addEventListener("touchmove", (e) => {
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+  const x = touch.clientX - rect.left - offsetX;
+  const col = Math.floor(x / CELL_SIZE);
+  hoverCol = (col >= 0 && col < COLS) ? col : null;
+  drawBoard();
+});
+
+// 手指觸控點擊落子
+canvas.addEventListener("touchstart", (e) => {
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0];
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+  const x = touch.clientX - rect.left - offsetX;
+  const col = Math.floor(x / CELL_SIZE);
+  const row = getAvailableRow(col);
+  if (row === null || col < 0 || col >= COLS) return;
+  e.preventDefault(); // 防止手機滑動或縮放
+  fallingPiece = { col, row, y: 0, color: "red" };
+  animateDrop();
+});
+
+// 手指離開清除 hover 預覽
+canvas.addEventListener("touchend", () => {
+  hoverCol = null;
+  drawBoard();
+});
+
 function animateDrop() {
   if (!fallingPiece) return;
   fallingPiece.y += 10;
