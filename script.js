@@ -350,28 +350,30 @@ function drawCatFace(face, resetbutton) {
   ctx.fill();
   ctx.stroke();
 
-  // 耳朵（正確的角度，貓耳朝上45°）
-  const earSize = r * 0.8;
-  const earHeight = r * 0.7;
+  // 耳朵參數
+  const earW = r * 0.6;
+  const earH = r * 0.7;
+  const earY = y - r + 2; // 上邊緣+微偏移
+  const earXOffset = r * 0.55; // 稍靠近中間一點（朝內）
 
-  // 左耳（左上角斜斜）
+  // 左耳（朝內傾斜）
   ctx.beginPath();
-  ctx.moveTo(x - r * 0.6, y - r); // 基底
-  ctx.lineTo(x - r * 0.6 - earSize / 2, y - r - earHeight); // 左上尖
-  ctx.lineTo(x - r * 0.6 + earSize / 2, y - r); // 回來
+  ctx.moveTo(x - earXOffset, earY);
+  ctx.lineTo(x - earXOffset - earW * 0.4, earY - earH);
+  ctx.lineTo(x - earXOffset + earW * 0.4, earY - earH);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // 右耳（右上角斜斜）
+  // 右耳（朝內傾斜）
   ctx.beginPath();
-  ctx.moveTo(x + r * 0.6, y - r); // 基底
-  ctx.lineTo(x + r * 0.6 - earSize / 2, y - r - earHeight); // 右上尖
-  ctx.lineTo(x + r * 0.6 + earSize / 2, y - r); // 回來
+  ctx.moveTo(x + earXOffset, earY);
+  ctx.lineTo(x + earXOffset - earW * 0.4, earY - earH);
+  ctx.lineTo(x + earXOffset + earW * 0.4, earY - earH);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-
+  
   // 眼睛（有眨眼）
   blink_timer++;
   if (blink_timer > blink_interval) {
