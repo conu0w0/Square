@@ -9,6 +9,8 @@ const BOARD_WIDTH = COLS * CELL_SIZE;
 const BOARD_HEIGHT = ROWS * CELL_SIZE;
 canvas.width = BOARD_WIDTH;
 canvas.height = BOARD_HEIGHT + STATUS_HEIGHT;
+const maxR = Math.min(canvas.width, canvas.height) * 0.04;
+const catFaceRadius = Math.min(maxR, 20);
 
 let board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
 let currentPlayer = "red";
@@ -250,7 +252,11 @@ function drawBottomStatus(offsetX) {
 
   ctx.save();
   ctx.globalAlpha = currentPlayer === "blue" || gameOver ? 1 : 0.3;
-  drawCatFace({ x: offsetX + BOARD_WIDTH - 30, y: baseY + 20, r: 20, pat: facePat }, { col: "#74b9ff" });
+  drawCatFace(
+    { x: offsetX + BOARD_WIDTH - catFaceRadius - 10, y: baseY + catFaceRadius, r: catFaceRadius, pat: facePat },
+    { col: "#74b9ff" }
+  );
+
   ctx.restore();
 
   ctx.save();
@@ -262,27 +268,38 @@ function drawBottomStatus(offsetX) {
 }
 
 function drawCatFace(face, resetbutton) {
-  const x = face.x, y = face.y, size = face.r * 2, r = 20;
+  const x = face.x, y = face.y, r = face.r;
+  const size = r * 2;
+
   ctx.lineWidth = 2;
   ctx.strokeStyle = resetbutton.col;
   ctx.fillStyle = resetbutton.col;
+
+  // 臉部
   ctx.beginPath();
-  roundRect(ctx, x - size / 2, y - size / 2, size, size, r);
+  roundRect(ctx, x - r, y - r, size, size, r);
   ctx.fill();
   ctx.stroke();
 
+  // 耳朵（左）
   ctx.beginPath();
-  ctx.moveTo(x - size / 2 + 5, y - size / 2 + 15);
-  ctx.lineTo(x - size / 2 + 25, y - size / 2 - 15);
-  ctx.lineTo(x - size / 2 + 45, y - size / 2 + 15);
-  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.moveTo(x - r + r * 0.25, y - r + r * 0.75);
+  ctx.lineTo(x - r + r * 1.25, y - r - r * 0.75);
+  ctx.lineTo(x - r + r * 2.25, y - r + r * 0.75);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
 
+  // 耳朵（右）
   ctx.beginPath();
-  ctx.moveTo(x + size / 2 - 5, y - size / 2 + 15);
-  ctx.lineTo(x + size / 2 - 25, y - size / 2 - 15);
-  ctx.lineTo(x + size / 2 - 45, y - size / 2 + 15);
-  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.moveTo(x + r - r * 0.25, y - r + r * 0.75);
+  ctx.lineTo(x + r - r * 1.25, y - r - r * 0.75);
+  ctx.lineTo(x + r - r * 2.25, y - r + r * 0.75);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
 
+  // 眨眼計時
   blink_timer++;
   if (blink_timer > blink_interval) {
     blink_counter++;
@@ -293,24 +310,26 @@ function drawCatFace(face, resetbutton) {
     }
   }
 
+  // 眼睛
   if (blink_counter === 0) {
     ctx.fillStyle = "#000";
-    ctx.beginPath(); ctx.arc(x - 13, y - 5, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + 13, y - 5, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x - r * 0.65, y - r * 0.25, r * 0.25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + r * 0.65, y - r * 0.25, r * 0.25, 0, Math.PI * 2); ctx.fill();
   } else {
     ctx.strokeStyle = "#000";
-    ctx.beginPath(); ctx.moveTo(x - 18, y - 5); ctx.lineTo(x - 8, y - 5); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x + 8, y - 5); ctx.lineTo(x + 18, y - 5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.9, y - r * 0.25); ctx.lineTo(x - r * 0.4, y - r * 0.25); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.4, y - r * 0.25); ctx.lineTo(x + r * 0.9, y - r * 0.25); ctx.stroke();
   }
 
+  // 嘴巴
   ctx.strokeStyle = "#000";
   if (face.pat === 0) {
-    ctx.beginPath(); ctx.arc(x - 4, y + 10, 4, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
-    ctx.beginPath(); ctx.arc(x + 4, y + 10, 4, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x - r * 0.2, y + r * 0.5, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x + r * 0.2, y + r * 0.5, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
   } else if (face.pat === 1) {
-    ctx.beginPath(); ctx.moveTo(x - 6, y + 8); ctx.lineTo(x + 6, y + 8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.3, y + r * 0.4); ctx.lineTo(x + r * 0.3, y + r * 0.4); ctx.stroke();
   } else if (face.pat === 2) {
-    ctx.beginPath(); ctx.arc(x, y + 10, 6, 0, Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y + r * 0.5, r * 0.3, 0, Math.PI); ctx.stroke();
   }
 }
 
