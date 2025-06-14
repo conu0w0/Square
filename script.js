@@ -334,13 +334,9 @@ function drawBottomStatus(offsetX) {
 function drawCatFace(face, resetbutton) {
   const x = face.x, y = face.y, r = face.r;
   const size = r * 2;
-  const earSize = r * 0.6;
-  const earHeight = r * 0.7;
-  const earOffsetX = r * 0.6;
-  const earOffsetY = r * 1.1;
   const cornerRadius = r * 0.3;
 
-  // 臉部（圓角方形）
+  // 臉（圓角正方形）
   ctx.lineWidth = 2;
   ctx.strokeStyle = resetbutton.col;
   ctx.fillStyle = resetbutton.col;
@@ -349,25 +345,30 @@ function drawCatFace(face, resetbutton) {
   ctx.fill();
   ctx.stroke();
 
-  // 耳朵（左）
+  // 耳朵參數（小一點）
+  const earWidth = r * 0.8;
+  const earHeight = r * 0.7;
+  const earYOffset = r * 0.9;
+
+  // 左耳
   ctx.beginPath();
-  ctx.moveTo(x - earOffsetX, y - earOffsetY);
-  ctx.lineTo(x - earOffsetX - earSize / 2, y - earOffsetY - earHeight);
-  ctx.lineTo(x - earOffsetX + earSize / 2, y - earOffsetY - earHeight);
+  ctx.moveTo(x - r * 0.6, y - earYOffset);
+  ctx.lineTo(x - r * 0.6 - earWidth / 2, y - earYOffset - earHeight);
+  ctx.lineTo(x - r * 0.6 + earWidth / 2, y - earYOffset - earHeight);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // 耳朵（右）
+  // 右耳
   ctx.beginPath();
-  ctx.moveTo(x + earOffsetX, y - earOffsetY);
-  ctx.lineTo(x + earOffsetX - earSize / 2, y - earOffsetY - earHeight);
-  ctx.lineTo(x + earOffsetX + earSize / 2, y - earOffsetY - earHeight);
+  ctx.moveTo(x + r * 0.6, y - earYOffset);
+  ctx.lineTo(x + r * 0.6 - earWidth / 2, y - earYOffset - earHeight);
+  ctx.lineTo(x + r * 0.6 + earWidth / 2, y - earYOffset - earHeight);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // 眼睛（含眨眼動畫）
+  // 眨眼
   blink_timer++;
   if (blink_timer > blink_interval) {
     blink_counter++;
@@ -378,25 +379,26 @@ function drawCatFace(face, resetbutton) {
     }
   }
 
+  // 眼睛
   if (blink_counter === 0) {
     ctx.fillStyle = "#000";
-    ctx.beginPath(); ctx.arc(x - r * 0.5, y - r * 0.2, r * 0.2, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + r * 0.5, y - r * 0.2, r * 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x - r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2); ctx.fill();
   } else {
     ctx.strokeStyle = "#000";
-    ctx.beginPath(); ctx.moveTo(x - r * 0.7, y - r * 0.2); ctx.lineTo(x - r * 0.3, y - r * 0.2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x + r * 0.3, y - r * 0.2); ctx.lineTo(x + r * 0.7, y - r * 0.2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.7, y - r * 0.3); ctx.lineTo(x - r * 0.3, y - r * 0.3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.3, y - r * 0.3); ctx.lineTo(x + r * 0.7, y - r * 0.3); ctx.stroke();
   }
 
-  // 嘴巴表情
+  // 嘴巴（終於貼好惹！）
   ctx.strokeStyle = "#000";
   if (face.pat === 0) {
-    ctx.beginPath(); ctx.arc(x - r * 0.3, y + r * 0.5, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
-    ctx.beginPath(); ctx.arc(x + r * 0.3, y + r * 0.5, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x - r * 0.3, y + r * 0.3, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x + r * 0.3, y + r * 0.3, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
   } else if (face.pat === 1) {
-    ctx.beginPath(); ctx.moveTo(x - r * 0.3, y + r * 0.4); ctx.lineTo(x + r * 0.3, y + r * 0.4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.3, y + r * 0.3); ctx.lineTo(x + r * 0.3, y + r * 0.3); ctx.stroke();
   } else if (face.pat === 2) {
-    ctx.beginPath(); ctx.arc(x, y + r * 0.5, r * 0.3, 0, Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y + r * 0.3, r * 0.3, 0, Math.PI); ctx.stroke();
   }
 }
 
