@@ -323,8 +323,9 @@ function drawBottomStatus(offsetX) {
   ctx.restore();
 
   ctx.save();
+  ctx.globalAlpha = 1;
   ctx.font = "16px 'Noto Sans TC'";
-  ctx.fillStyle = "#333";
+  ctx.fillStyle = gameOver ? "#ff4757" : "#333";
   ctx.textAlign = "center";
   ctx.fillText(msg, canvas.width / 2, baseY + 25);
   ctx.restore();
@@ -333,36 +334,40 @@ function drawBottomStatus(offsetX) {
 function drawCatFace(face, resetbutton) {
   const x = face.x, y = face.y, r = face.r;
   const size = r * 2;
+  const earSize = r * 0.6;
+  const earHeight = r * 0.7;
+  const earOffsetX = r * 0.6;
+  const earOffsetY = r * 1.1;
+  const cornerRadius = r * 0.3;
 
+  // 臉部（圓角方形）
   ctx.lineWidth = 2;
   ctx.strokeStyle = resetbutton.col;
   ctx.fillStyle = resetbutton.col;
-
-  // 臉部
   ctx.beginPath();
-  roundRect(ctx, x - r, y - r, size, size, r);
+  roundRect(ctx, x - r, y - r, size, size, cornerRadius);
   ctx.fill();
   ctx.stroke();
 
   // 耳朵（左）
   ctx.beginPath();
-  ctx.moveTo(x - r + r * 0.25, y - r + r * 0.75);
-  ctx.lineTo(x - r + r * 1.25, y - r - r * 0.75);
-  ctx.lineTo(x - r + r * 2.25, y - r + r * 0.75);
+  ctx.moveTo(x - earOffsetX, y - earOffsetY);
+  ctx.lineTo(x - earOffsetX - earSize / 2, y - earOffsetY - earHeight);
+  ctx.lineTo(x - earOffsetX + earSize / 2, y - earOffsetY - earHeight);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
   // 耳朵（右）
   ctx.beginPath();
-  ctx.moveTo(x + r - r * 0.25, y - r + r * 0.75);
-  ctx.lineTo(x + r - r * 1.25, y - r - r * 0.75);
-  ctx.lineTo(x + r - r * 2.25, y - r + r * 0.75);
+  ctx.moveTo(x + earOffsetX, y - earOffsetY);
+  ctx.lineTo(x + earOffsetX - earSize / 2, y - earOffsetY - earHeight);
+  ctx.lineTo(x + earOffsetX + earSize / 2, y - earOffsetY - earHeight);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // 眨眼計時
+  // 眼睛（含眨眼動畫）
   blink_timer++;
   if (blink_timer > blink_interval) {
     blink_counter++;
@@ -373,22 +378,21 @@ function drawCatFace(face, resetbutton) {
     }
   }
 
-  // 眼睛
   if (blink_counter === 0) {
     ctx.fillStyle = "#000";
-    ctx.beginPath(); ctx.arc(x - r * 0.65, y - r * 0.25, r * 0.25, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + r * 0.65, y - r * 0.25, r * 0.25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x - r * 0.5, y - r * 0.2, r * 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + r * 0.5, y - r * 0.2, r * 0.2, 0, Math.PI * 2); ctx.fill();
   } else {
     ctx.strokeStyle = "#000";
-    ctx.beginPath(); ctx.moveTo(x - r * 0.9, y - r * 0.25); ctx.lineTo(x - r * 0.4, y - r * 0.25); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x + r * 0.4, y - r * 0.25); ctx.lineTo(x + r * 0.9, y - r * 0.25); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.7, y - r * 0.2); ctx.lineTo(x - r * 0.3, y - r * 0.2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.3, y - r * 0.2); ctx.lineTo(x + r * 0.7, y - r * 0.2); ctx.stroke();
   }
 
-  // 嘴巴
+  // 嘴巴表情
   ctx.strokeStyle = "#000";
   if (face.pat === 0) {
-    ctx.beginPath(); ctx.arc(x - r * 0.2, y + r * 0.5, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
-    ctx.beginPath(); ctx.arc(x + r * 0.2, y + r * 0.5, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x - r * 0.3, y + r * 0.5, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x + r * 0.3, y + r * 0.5, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
   } else if (face.pat === 1) {
     ctx.beginPath(); ctx.moveTo(x - r * 0.3, y + r * 0.4); ctx.lineTo(x + r * 0.3, y + r * 0.4); ctx.stroke();
   } else if (face.pat === 2) {
