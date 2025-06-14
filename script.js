@@ -148,6 +148,17 @@ canvas.addEventListener("mouseleave", () => {
   drawBoard();
 });
 
+function getCanvasColFromEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+
+  // 支援滑鼠與觸控
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const x = (clientX - rect.left) * (canvas.width / rect.width) - offsetX;
+  return Math.floor(x / CELL_SIZE);
+}
+
+
 canvas.addEventListener("touchstart", (e) => {
   if (gameOver || fallingPiece || currentPlayer !== "red") return;
   e.preventDefault();
@@ -312,29 +323,29 @@ function drawCatFace(face, resetbutton) {
   ctx.stroke();
 
   // 耳朵參數
-  const earW = r * 0.6;
-  const earH = r * 0.7;
-  const earY = y - r + 2; // 上邊緣+微偏移
-  const earXOffset = r * 0.55; // 稍靠近中間一點（朝內）
-
-  // 左耳（朝內傾斜）
-  ctx.beginPath();
-  ctx.moveTo(x - earXOffset, earY);
-  ctx.lineTo(x - earXOffset - earW * 0.4, earY - earH);
-  ctx.lineTo(x - earXOffset + earW * 0.4, earY - earH);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  // 右耳（朝內傾斜）
-  ctx.beginPath();
-  ctx.moveTo(x + earXOffset, earY);
-  ctx.lineTo(x + earXOffset - earW * 0.4, earY - earH);
-  ctx.lineTo(x + earXOffset + earW * 0.4, earY - earH);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+  const earW = r * 0.8;   // 耳朵寬
+  const earH = r * 0.8;   // 耳朵高
+  const earY = y - r;     // 臉的上邊緣
+  const earXOffset = r * 0.5; // 離中心的左右距離
   
+  // 左耳
+  ctx.beginPath();
+  ctx.moveTo(x - earXOffset, earY); // 基底點
+  ctx.lineTo(x - earXOffset - earW / 2, earY - earH); // 左尖端
+  ctx.lineTo(x - earXOffset + earW / 2, earY - earH * 0.7); // 右邊帶一點下傾
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // 右耳
+  ctx.beginPath();
+  ctx.moveTo(x + earXOffset, earY); // 基底點
+  ctx.lineTo(x + earXOffset - earW / 2, earY - earH * 0.7); // 左邊帶一點下傾
+  ctx.lineTo(x + earXOffset + earW / 2, earY - earH); // 右尖端
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
   // 眼睛（有眨眼）
   blink_timer++;
   if (blink_timer > blink_interval) {
