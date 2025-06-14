@@ -249,6 +249,11 @@ function aiMove() {
   }
 }
 
+function toggleRules() {
+  const overlay = document.getElementById("overlay");
+  overlay.classList.toggle("hidden");
+}
+
 function checkForSquareWin(player) {
   for (let size = 2; size <= Math.min(ROWS, COLS); size++) {
     for (let r = 0; r <= ROWS - size; r++) {
@@ -336,7 +341,7 @@ function drawCatFace(face, resetbutton) {
   const size = r * 2;
   const cornerRadius = r * 0.3;
 
-  // 臉（圓角正方形）
+  // 臉（圓角方形）
   ctx.lineWidth = 2;
   ctx.strokeStyle = resetbutton.col;
   ctx.fillStyle = resetbutton.col;
@@ -345,30 +350,29 @@ function drawCatFace(face, resetbutton) {
   ctx.fill();
   ctx.stroke();
 
-  // 耳朵參數（小一點）
-  const earWidth = r * 0.8;
+  // 耳朵（正確的角度，貓耳朝上45°）
+  const earSize = r * 0.8;
   const earHeight = r * 0.7;
-  const earYOffset = r * 0.9;
 
-  // 左耳
+  // 左耳（左上角斜斜）
   ctx.beginPath();
-  ctx.moveTo(x - r * 0.6, y - earYOffset);
-  ctx.lineTo(x - r * 0.6 - earWidth / 2, y - earYOffset - earHeight);
-  ctx.lineTo(x - r * 0.6 + earWidth / 2, y - earYOffset - earHeight);
+  ctx.moveTo(x - r * 0.6, y - r); // 基底
+  ctx.lineTo(x - r * 0.6 - earSize / 2, y - r - earHeight); // 左上尖
+  ctx.lineTo(x - r * 0.6 + earSize / 2, y - r); // 回來
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // 右耳
+  // 右耳（右上角斜斜）
   ctx.beginPath();
-  ctx.moveTo(x + r * 0.6, y - earYOffset);
-  ctx.lineTo(x + r * 0.6 - earWidth / 2, y - earYOffset - earHeight);
-  ctx.lineTo(x + r * 0.6 + earWidth / 2, y - earYOffset - earHeight);
+  ctx.moveTo(x + r * 0.6, y - r); // 基底
+  ctx.lineTo(x + r * 0.6 - earSize / 2, y - r - earHeight); // 右上尖
+  ctx.lineTo(x + r * 0.6 + earSize / 2, y - r); // 回來
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // 眨眼
+  // 眼睛（有眨眼）
   blink_timer++;
   if (blink_timer > blink_interval) {
     blink_counter++;
@@ -379,7 +383,6 @@ function drawCatFace(face, resetbutton) {
     }
   }
 
-  // 眼睛
   if (blink_counter === 0) {
     ctx.fillStyle = "#000";
     ctx.beginPath(); ctx.arc(x - r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2); ctx.fill();
@@ -390,16 +393,14 @@ function drawCatFace(face, resetbutton) {
     ctx.beginPath(); ctx.moveTo(x + r * 0.3, y - r * 0.3); ctx.lineTo(x + r * 0.7, y - r * 0.3); ctx.stroke();
   }
 
-  // 嘴巴（終於貼好惹！）
+  // ω 嘴
   ctx.strokeStyle = "#000";
-  if (face.pat === 0) {
-    ctx.beginPath(); ctx.arc(x - r * 0.3, y + r * 0.3, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
-    ctx.beginPath(); ctx.arc(x + r * 0.3, y + r * 0.3, r * 0.2, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke();
-  } else if (face.pat === 1) {
-    ctx.beginPath(); ctx.moveTo(x - r * 0.3, y + r * 0.3); ctx.lineTo(x + r * 0.3, y + r * 0.3); ctx.stroke();
-  } else if (face.pat === 2) {
-    ctx.beginPath(); ctx.arc(x, y + r * 0.3, r * 0.3, 0, Math.PI); ctx.stroke();
-  }
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x - r * 0.4, y + r * 0.4);
+  ctx.quadraticCurveTo(x - r * 0.2, y + r * 0.6, x, y + r * 0.4);
+  ctx.quadraticCurveTo(x + r * 0.2, y + r * 0.6, x + r * 0.4, y + r * 0.4);
+  ctx.stroke();
 }
 
 resetGame();
