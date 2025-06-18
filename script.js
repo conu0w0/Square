@@ -37,6 +37,8 @@ function resetGame() {
   hoverCol = null;
 
   document.querySelector(".reset-btn").classList.remove("blink");
+
+  updateStatusTransition();
   drawGame();
 
   if (currentPlayer === "blue") scheduleAiMove();
