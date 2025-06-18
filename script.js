@@ -381,16 +381,6 @@ function applyTheme(theme) {
   }
 }
 
-
-  localStorage.setItem("theme", theme);
-  drawBoard(); // 🆕 主題切換後重新繪製
-}
-
-function toggleTheme() {
-  const isDark = document.body.classList.contains("dark");
-  applyTheme(isDark ? "light" : "dark");
-}
-
 (function () {
   const storedTheme = localStorage.getItem("theme");
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
