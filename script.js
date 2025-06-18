@@ -51,12 +51,18 @@ function drawGame() {
 
 function updateStatusTransition() {
   const speed = 0.1;
-  const redTarget = gameOver || currentPlayer === "red" ? 1 : 0;
-  const blueTarget = gameOver || currentPlayer === "blue" ? 1 : 0;
+
+  const isTouchDevice = 'ontouchstart' in window;
+  const redTurn = !gameOver && currentPlayer === "red";
+  const blueTurn = !gameOver && currentPlayer === "blue";
+
+  const redTarget = redTurn ? 1 : 0;
+  const blueTarget = blueTurn ? 1 : 0;
 
   redActive += (redTarget - redActive) * speed;
   blueActive += (blueTarget - blueActive) * speed;
 }
+
 
 function drawBoard() {
   boardCtx.clearRect(0, 0, boardCanvas.width, boardCanvas.height);
@@ -259,18 +265,14 @@ function drawCatFace(ctx, face, colorObj) {
   }
 
   // === ω 嘴 ===
-  ctx.strokeStyle = "#000";
-
-  // 左弧線
   ctx.beginPath();
-  ctx.moveTo(x - r * 0.4, y + r * 0.3);
-  ctx.quadraticCurveTo(x - r * 0.2, y + r * 0.5, x, y + r * 0.3);
+  ctx.moveTo(x - 10, y + 10);
+  ctx.quadraticCurveTo(x - 5, y + 18, x, y + 10);
   ctx.stroke();
-
-  // 右弧線
+  
   ctx.beginPath();
-  ctx.quadraticCurveTo(x + r * 0.2, y + r * 0.5, x + r * 0.4, y + r * 0.3);
-  ctx.stroke();
+  ctx.quadraticCurveTo(x + 5, y + 18, x + 10, y + 10);
+  ctx.stroke(); 
 }
 
 // ---------- 邏輯 ----------
