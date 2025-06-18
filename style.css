@@ -10,6 +10,12 @@ body {
   justify-content: center;
   min-height: 100vh;
   overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark {
+  background-color: #121212;
+  color: #eee;
 }
 
 .game-wrapper {
@@ -18,9 +24,19 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 12px;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* 主體上方欄 */
+body.dark .game-wrapper {
+  background-color: #1e1e1e;
+  box-shadow: 0 2px 10px rgba(255,255,255,0.05);
+}
+
 .top-bar {
   width: 100%;
   max-width: 420px;
@@ -33,9 +49,14 @@ body {
   border-radius: 10px;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* 標題文字 */
+body.dark .top-bar {
+  background-color: #1e1e1e;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
 h1 {
   font-size: 2.2rem;
   margin: 0;
@@ -43,12 +64,11 @@ h1 {
   text-align: center;
 }
 
-/* 所有按鈕通用樣式 */
 .reset-btn,
 .info-btn,
 .theme-btn,
 .close-btn,
-.home-btn{
+.home-btn {
   width: 40px;
   height: 40px;
   font-size: 20px;
@@ -63,6 +83,16 @@ h1 {
 
 button:hover {
   transform: scale(1.05);
+}
+
+body.dark .reset-btn,
+body.dark .info-btn,
+body.dark .theme-btn,
+body.dark .close-btn,
+body.dark .home-btn {
+  background-color: #2a2a2a;
+  color: #eee;
+  box-shadow: 0 1px 4px rgba(255, 255, 255, 0.05);
 }
 
 #status {
@@ -106,6 +136,13 @@ button:hover {
   position: relative;
   font-size: 1rem;
   line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark .rules-popup {
+  background-color: #1e1e1e;
+  color: #eee;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 .rules-popup p {
@@ -131,44 +168,23 @@ button:hover {
   display: none;
 }
 
-/* 暗色主題切換（由 JS 加上 body.dark 控制） */
-body.dark {
-  background-color: #121212;
-  color: #eee;
-}
-
-body.dark .top-bar {
-  background-color: #1e1e1e;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-}
-
-body.dark .reset-btn,
-body.dark .info-btn,
-body.dark .theme-btn,
-body.dark .close-btn,
-body.dark .home-btn{
-  background-color: #2a2a2a;
-  color: #eee;
-  box-shadow: 0 1px 4px rgba(255, 255, 255, 0.05);
-}
-
-body.dark .rules-popup {
-  background-color: #1e1e1e;
-  color: #eee;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-}
-
+/* Canvas 主題化 */
 canvas {
   width: 100%;
   height: auto;
   display: block;
-  margin: 24px 0;  /* 調整上下間距，加大空隙 */
+  margin: 12px 0;
   touch-action: none;
   box-sizing: border-box;
-  padding: 8px; /* 可選：canvas 裡面也有空隙（需搭配繪圖邏輯） */
-  background-color: #fff; /* 可設背景幫助你觀察空隙 */
-  border-radius: 10px; /* 美觀 */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* 讓它更像卡片 */
+  padding: 0;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  transition: background-color 0.3s ease;
+}
+
+body.dark canvas {
+  background-color: #1e1e1e;
 }
 
 /* 響應式 */
