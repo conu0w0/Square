@@ -193,6 +193,23 @@ body.dark canvas {
   background-color: #1e1e1e;
 }
 
+.game-canvas {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.status-canvas {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  background-color: transparent;
+  margin-top: 8px;
+}
+
 /* 響應式 */
 @media (max-width: 480px) {
   h1 {
