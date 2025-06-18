@@ -261,17 +261,17 @@ function drawCatFace(ctx, face, colorObj) {
   // === ω 嘴 ===
   ctx.strokeStyle = "#000";
   ctx.lineWidth = 2;
-
-  // 左彎
+  
+  // 左小 u
   ctx.beginPath();
   ctx.moveTo(x - r * 0.4, y + r * 0.3);
-  ctx.quadraticCurveTo(x - r * 0.3, y + r * 0.5, x - r * 0.2, y + r * 0.3);
+  ctx.quadraticCurveTo(x - r * 0.35, y + r * 0.5, x - r * 0.2, y + r * 0.3);
   ctx.stroke();
-  
-  // 右彎
+
+  // 右小 u
   ctx.beginPath();
   ctx.moveTo(x + r * 0.2, y + r * 0.3);
-  ctx.quadraticCurveTo(x + r * 0.3, y + r * 0.5, x + r * 0.4, y + r * 0.3);
+  ctx.quadraticCurveTo(x + r * 0.35, y + r * 0.5, x + r * 0.4, y + r * 0.3);
   ctx.stroke();
 }
 
