@@ -287,6 +287,27 @@ function aiMove() {
 }
 
 // ---------- 事件監聽 ----------
+function handleInput(e) {
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
+
+  const col = getCanvasColFromEvent(e);
+  const row = getAvailableRow(col);
+
+  if (row === null || col < 0 || col >= COLS) return;
+
+  fallingPiece = { col, row, y: 0, color: "red" };
+  animateDrop();
+}
+
+function updateHoverCol(e) {
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
+
+  hoverCol = getCanvasColFromEvent(e);
+  if (hoverCol < 0 || hoverCol >= COLS) hoverCol = null;
+
+  drawBoard();
+}
+
 function getCanvasColFromEvent(e) {
   const rect = boardCanvas.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
