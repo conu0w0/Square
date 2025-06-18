@@ -1,8 +1,8 @@
 // ---------- Canvas 與常數 ----------
-const boardCanvas = document.getElementById("gameCanvas");
+const boardCanvas = document.getElementById("boardCanvas");
 const boardCtx = boardCanvas.getContext("2d");
 
-const boardCanvas = document.getElementById("boardCanvas");
+const statusCanvas = document.getElementById("statusCanvas");
 const statusCtx = statusCanvas.getContext("2d");
 
 const COLS = 7;
@@ -93,7 +93,6 @@ function drawPiece(x, y, color, preview = false) {
   const size = CELL_SIZE - 10;
   const radius = 12;
   const gradient = boardCtx.createLinearGradient(x, y, x + size, y + size);
-
   gradient.addColorStop(0, color === "red" ? "#ff4c4c" : "#4ea6ff");
   gradient.addColorStop(1, color === "red" ? "#a03028" : "#1f5fa5");
 
@@ -128,7 +127,6 @@ function drawStatus() {
   statusCtx.clearRect(0, 0, statusCanvas.width, statusCanvas.height);
   const isDark = document.body.classList.contains("dark");
   const baseY = STATUS_HEIGHT / 2;
-
   const msg = gameOver
     ? currentPlayer === "red" ? "你贏啦 🎉" : "汪汪勝出！"
     : currentPlayer === "red" ? "輪到你囉！" : "汪汪正在思考…";
@@ -160,17 +158,14 @@ function drawStatus() {
   statusCtx.restore();
 }
 
-function drawCatFace(ctx, face, resetbutton) {
+function drawCatFace(ctx, face, colorObj) {
   const x = face.x, y = face.y, r = face.r;
-  const size = r * 2;
-  const cornerRadius = r * 0.3;
-
+  const size = r * 2, cornerRadius = r * 0.3;
   ctx.lineWidth = 2;
-  ctx.fillStyle = resetbutton.col;
-  ctx.strokeStyle = resetbutton.col;
+  ctx.fillStyle = ctx.strokeStyle = colorObj.col;
+
   roundRect(ctx, x - r, y - r, size, size, cornerRadius);
-  ctx.fill();
-  ctx.stroke();
+  ctx.fill(); ctx.stroke();
 
   const earY = y - r - 6;
   const earW = r * 0.8;
@@ -182,16 +177,14 @@ function drawCatFace(ctx, face, resetbutton) {
   ctx.lineTo(x - earXOffset - earW / 2, earY + earH);
   ctx.lineTo(x - earXOffset + earW / 2, earY + earH * 0.7);
   ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+  ctx.fill(); ctx.stroke();
 
   ctx.beginPath();
   ctx.moveTo(x + earXOffset, earY);
   ctx.lineTo(x + earXOffset - earW / 2, earY + earH * 0.7);
   ctx.lineTo(x + earXOffset + earW / 2, earY + earH);
   ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+  ctx.fill(); ctx.stroke();
 
   blink_timer++;
   if (blink_timer > blink_interval) {
@@ -214,11 +207,9 @@ function drawCatFace(ctx, face, resetbutton) {
   }
 
   ctx.strokeStyle = "#000";
-  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(x - r * 0.4, y + r * 0.4);
-  ctx.quadraticCurveTo(x - r * 0.2, y + r * 0.6, x, y + r * 0.4);
-  ctx.quadraticCurveTo(x + r * 0.2, y + r * 0.6, x + r * 0.4, y + r * 0.4);
+  ctx.quadraticCurveTo(x, y + r * 0.6, x + r * 0.4, y + r * 0.4);
   ctx.stroke();
 }
 
@@ -324,6 +315,27 @@ boardCanvas.addEventListener("touchend", () => {
   hoverCol = null;
 });
 
+document.addEventListener("touchcancel", () => {
+  hoverCol = null;
+  drawBoard();
+}, { passive: true });
+
+function handleInput(e) {
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
+  const col = getCanvasColFromEvent(e);
+  const row = getAvailableRow(col);
+  if (row === null || col < 0 || col >= COLS) return;
+  fallingPiece = { col, row, y: 0, color: "red" };
+  animateDrop();
+}
+
+function updateHoverCol(e) {
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
+  hoverCol = getCanvasColFromEvent(e);
+  if (hoverCol < 0 || hoverCol >= COLS) hoverCol = null;
+  drawBoard();
+}
+
 // ---------- UI 控制 ----------
 function goHome() {
   window.location.href = "https://github.com/conu0w0/Square";
@@ -360,9 +372,3 @@ function toggleTheme() {
 })();
 
 window.onload = resetGame;
-
-// 防止觸控中斷時還殘留 hover 狀態
-document.addEventListener("touchcancel", () => {
-  hoverCol = null;
-  drawBoard();
-}, { passive: true });
