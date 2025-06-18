@@ -1,10 +1,11 @@
+// ---------- Canvas 與常數 ----------
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const COLS = 7;
 const ROWS = 6;
 const CELL_SIZE = 60;
-const STATUS_HEIGHT = 60; // 🆕 更緊湊
+const STATUS_HEIGHT = 60;
 const BOARD_WIDTH = COLS * CELL_SIZE;
 const BOARD_HEIGHT = ROWS * CELL_SIZE;
 canvas.width = BOARD_WIDTH;
@@ -12,6 +13,7 @@ canvas.height = BOARD_HEIGHT + STATUS_HEIGHT;
 
 const catFaceRadius = Math.min(canvas.width, canvas.height) * 0.04;
 
+// ---------- 狀態變數 ----------
 let board, currentPlayer, gameOver, fallingPiece, winCoords, hoverCol;
 let blink_counter = 0, blink_timer = 0, blink_interval = 120 + Math.random() * 180;
 let facePat = 0;
@@ -31,17 +33,16 @@ function resetGame() {
   if (currentPlayer === "blue") scheduleAiMove();
 }
 
-// ---------- 畫面主繪製 ----------
+// ---------- 主繪製 ----------
 function drawBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const offsetX = (canvas.width - BOARD_WIDTH) / 2;
   const isDark = document.body.classList.contains("dark");
 
-  // 棋格與棋子
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       ctx.save();
-      ctx.strokeStyle = isDark ? "#444" : "#aaa"; // 🆕 主題對應格線
+      ctx.strokeStyle = isDark ? "#444" : "#aaa";
       ctx.lineWidth = 1;
       ctx.strokeRect(offsetX + c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       ctx.restore();
@@ -51,7 +52,6 @@ function drawBoard() {
     }
   }
 
-  // 預覽與掉落棋子
   if (hoverCol !== null && !fallingPiece && !gameOver && currentPlayer === "red") {
     const row = getAvailableRow(hoverCol);
     if (row !== null) drawPiece(offsetX + hoverCol, row, currentPlayer, true);
@@ -76,7 +76,6 @@ function drawBoard() {
 
   drawBottomStatus(offsetX);
 
-  // 外框
   ctx.save();
   ctx.strokeStyle = isDark ? "#fff" : "#333";
   ctx.lineWidth = 4;
@@ -84,7 +83,6 @@ function drawBoard() {
   ctx.restore();
 }
 
-// ---------- 棋子繪製 ----------
 function drawPiece(col, row, color, preview = false) {
   const x = col * CELL_SIZE + 5;
   const y = row * CELL_SIZE + 5;
@@ -119,16 +117,11 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-// ---------- 底部狀態區 ----------
 function drawBottomStatus(offsetX) {
   const baseY = BOARD_HEIGHT + 10;
   const msg = gameOver
-    ? currentPlayer === "red"
-      ? "你贏啦 🎉"
-      : "汪汪勝出！"
-    : currentPlayer === "red"
-    ? "輪到你囉！"
-    : "汪汪正在思考…";
+    ? currentPlayer === "red" ? "你贏啦 🎉" : "汪汪勝出！"
+    : currentPlayer === "red" ? "輪到你囉！" : "汪汪正在思考…";
 
   ctx.save();
   ctx.globalAlpha = currentPlayer === "red" || gameOver ? 1 : 0.3;
@@ -141,7 +134,7 @@ function drawBottomStatus(offsetX) {
   ctx.save();
   ctx.globalAlpha = currentPlayer === "blue" || gameOver ? 1 : 0.3;
   drawCatFace({
-    x: canvas.width - catFaceRadius - 16, // 🆕 靠 canvas 右邊對齊
+    x: canvas.width - catFaceRadius - 16,
     y: baseY + catFaceRadius,
     r: catFaceRadius,
     pat: facePat
@@ -150,28 +143,24 @@ function drawBottomStatus(offsetX) {
 
   ctx.save();
   ctx.globalAlpha = 1;
-  ctx.font = "20px 'Noto Sans TC'"; // 🆕 放大文字
+  ctx.font = "20px 'Noto Sans TC'";
   ctx.fillStyle = gameOver ? "#ff4757" : "#333";
   ctx.textAlign = "center";
   ctx.fillText(msg, canvas.width / 2, baseY + 25);
   ctx.restore();
 }
 
-// ---------- 可愛的貓貓 😺 ----------
 function drawCatFace(face, resetbutton) {
   const x = face.x, y = face.y, r = face.r;
-  const size = r * 2;
   const cornerRadius = r * 0.3;
 
-  // 臉
   ctx.lineWidth = 2;
   ctx.fillStyle = resetbutton.col;
   ctx.strokeStyle = resetbutton.col;
-  roundRect(ctx, x - r, y - r, size, size, cornerRadius);
+  roundRect(ctx, x - r, y - r, r * 2, r * 2, cornerRadius);
   ctx.fill();
   ctx.stroke();
 
-  // 🆕 耳朵位置往上移
   const earY = y - r - 6;
   const earW = r * 0.8;
   const earH = r * 0.8;
@@ -195,7 +184,7 @@ function drawCatFace(face, resetbutton) {
   ctx.fill();
   ctx.stroke();
 
-  // 眼睛或眨眼
+  // 眨眼
   blink_timer++;
   if (blink_timer > blink_interval) {
     blink_counter++;
@@ -216,7 +205,7 @@ function drawCatFace(face, resetbutton) {
     ctx.beginPath(); ctx.moveTo(x + r * 0.3, y - r * 0.3); ctx.lineTo(x + r * 0.7, y - r * 0.3); ctx.stroke();
   }
 
-  // ω 嘴
+  // 嘴
   ctx.strokeStyle = "#000";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -226,103 +215,12 @@ function drawCatFace(face, resetbutton) {
   ctx.stroke();
 }
 
-canvas.addEventListener("click", (e) => {
-  if (gameOver || fallingPiece || currentPlayer !== "red") return;
-  const col = getCanvasColFromEvent(e);
-  const row = getAvailableRow(col);
-  if (row === null || col < 0 || col >= COLS) return;
-  fallingPiece = { col, row, y: 0, color: "red" };
-  animateDrop();
-});
-
-canvas.addEventListener("mousemove", (e) => {
-  if (gameOver || fallingPiece || currentPlayer !== "red") return;
-  hoverCol = getCanvasColFromEvent(e);
-  if (hoverCol < 0 || hoverCol >= COLS) hoverCol = null;
-  drawBoard();
-});
-
-canvas.addEventListener("mouseleave", () => {
-  hoverCol = null;
-  drawBoard();
-});
-
-canvas.addEventListener("touchstart", (e) => {
-  if (gameOver || fallingPiece || currentPlayer !== "red") return;
-  e.preventDefault();
-  const col = getCanvasColFromEvent(e);
-  const row = getAvailableRow(col);
-  if (row === null || col < 0 || col >= COLS) return;
-  fallingPiece = { col, row, y: 0, color: "red" };
-  animateDrop();
-});
-
-canvas.addEventListener("touchmove", (e) => {
-  if (gameOver || fallingPiece || currentPlayer !== "red") return;
-  hoverCol = getCanvasColFromEvent(e);
-  if (hoverCol < 0 || hoverCol >= COLS) hoverCol = null;
-  drawBoard();
-});
-
-canvas.addEventListener("touchend", () => {
-  hoverCol = null;
-  drawBoard();
-});
-
-function scheduleAiMove() {
-  const delay = 500 + Math.random() * 700;
-  setTimeout(aiMove, delay);
-}
-
-function aiMove() {
-  if (gameOver) return;
-  const options = [];
-  for (let c = 0; c < COLS; c++) {
-    if (getAvailableRow(c) !== null) options.push(c);
-  }
-  const col = options[Math.floor(Math.random() * options.length)];
-  const row = getAvailableRow(col);
-  if (row !== null) {
-    fallingPiece = { col, row, y: 0, color: "blue" };
-    animateDrop();
-  }
-}
-
-function animateDrop() {
-  if (!fallingPiece) return;
-  fallingPiece.y += 10;
-  if (fallingPiece.y / CELL_SIZE >= fallingPiece.row) {
-    board[fallingPiece.row][fallingPiece.col] = fallingPiece.color;
-    fallingPiece = null;
-
-    if (checkForSquareWin(currentPlayer)) {
-      gameOver = true;
-      document.querySelector(".reset-btn").classList.add("blink");
-    } else if (isBoardFull()) {
-      gameOver = true;
-      document.querySelector(".reset-btn").classList.add("blink");
-    } else {
-      currentPlayer = currentPlayer === "red" ? "blue" : "red";
-      if (currentPlayer === "blue") scheduleAiMove();
-    }
-  }
-  drawBoard();
-  if (fallingPiece) requestAnimationFrame(animateDrop);
-}
-
+// ---------- 遊戲邏輯 ----------
 function getAvailableRow(col) {
   for (let r = ROWS - 1; r >= 0; r--) {
     if (!board[r][col]) return r;
   }
   return null;
-}
-
-function getCanvasColFromEvent(e) {
-  const rect = canvas.getBoundingClientRect();
-  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const x = (clientX - rect.left) * (canvas.width / rect.width) - offsetX;
-  return Math.floor(x / CELL_SIZE);
 }
 
 function isBoardFull() {
@@ -353,13 +251,83 @@ function checkForSquareWin(player) {
   return false;
 }
 
+// ---------- 掉落與 AI ----------
+function animateDrop() {
+  if (!fallingPiece) return;
+  fallingPiece.y += 10;
+  if (fallingPiece.y / CELL_SIZE >= fallingPiece.row) {
+    board[fallingPiece.row][fallingPiece.col] = fallingPiece.color;
+    fallingPiece = null;
+
+    if (checkForSquareWin(currentPlayer) || isBoardFull()) {
+      gameOver = true;
+      document.querySelector(".reset-btn").classList.add("blink");
+    } else {
+      currentPlayer = currentPlayer === "red" ? "blue" : "red";
+      if (currentPlayer === "blue") scheduleAiMove();
+    }
+  }
+  drawBoard();
+  if (fallingPiece) requestAnimationFrame(animateDrop);
+}
+
+function scheduleAiMove() {
+  const delay = 500 + Math.random() * 700;
+  setTimeout(aiMove, delay);
+}
+
+function aiMove() {
+  if (gameOver) return;
+  const options = [];
+  for (let c = 0; c < COLS; c++) {
+    if (getAvailableRow(c) !== null) options.push(c);
+  }
+  const col = options[Math.floor(Math.random() * options.length)];
+  const row = getAvailableRow(col);
+  fallingPiece = { col, row, y: 0, color: "blue" };
+  animateDrop();
+}
+
+// ---------- 事件監聽 ----------
+canvas.addEventListener("click", handleInput);
+canvas.addEventListener("mousemove", updateHoverCol);
+canvas.addEventListener("mouseleave", () => { hoverCol = null; drawBoard(); });
+
+canvas.addEventListener("touchstart", (e) => { e.preventDefault(); handleInput(e); });
+canvas.addEventListener("touchmove", updateHoverCol);
+canvas.addEventListener("touchend", () => { hoverCol = null; drawBoard(); });
+
+function handleInput(e) {
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
+  const col = getCanvasColFromEvent(e);
+  const row = getAvailableRow(col);
+  if (row === null || col < 0 || col >= COLS) return;
+  fallingPiece = { col, row, y: 0, color: "red" };
+  animateDrop();
+}
+
+function updateHoverCol(e) {
+  if (gameOver || fallingPiece || currentPlayer !== "red") return;
+  hoverCol = getCanvasColFromEvent(e);
+  if (hoverCol < 0 || hoverCol >= COLS) hoverCol = null;
+  drawBoard();
+}
+
+function getCanvasColFromEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const x = (clientX - rect.left) * (canvas.width / rect.width) - offsetX;
+  return Math.floor(x / CELL_SIZE);
+}
+
+// ---------- UI 控制全域公開 ----------
 function goHome() {
   window.location.href = "https://github.com/conu0w0/Square";
 }
 
 function toggleRules() {
-  const overlay = document.getElementById("overlay");
-  overlay.classList.toggle("hidden");
+  document.getElementById("overlay").classList.toggle("hidden");
 }
 
 function closeRules(event) {
@@ -367,20 +335,20 @@ function closeRules(event) {
   toggleRules();
 }
 
-// -------- 主題套用與初始載入 --------
 function applyTheme(theme) {
   document.body.classList.toggle("dark", theme === "dark");
   const themeBtn = document.querySelector(".theme-btn");
-  if (themeBtn) {
-    themeBtn.textContent = theme === "dark" ? "🌞" : "🌙";
-  }
+  if (themeBtn) themeBtn.textContent = theme === "dark" ? "🌞" : "🌙";
   localStorage.setItem("theme", theme);
-
-  if (board) {
-    drawBoard();
-  }
+  if (board) drawBoard();
 }
 
+function toggleTheme() {
+  const isDark = document.body.classList.contains("dark");
+  applyTheme(isDark ? "light" : "dark");
+}
+
+// ---------- 頁面載入 ----------
 (function () {
   const storedTheme = localStorage.getItem("theme");
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -388,6 +356,4 @@ function applyTheme(theme) {
   applyTheme(theme);
 })();
 
-window.onload = () => {
-  resetGame();
-};
+window.onload = resetGame;
