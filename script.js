@@ -2,7 +2,7 @@
 const boardCanvas = document.getElementById("gameCanvas");
 const boardCtx = boardCanvas.getContext("2d");
 
-const statusCanvas = document.getElementById("statusCanvas");
+const boardCanvas = document.getElementById("boardCanvas");
 const statusCtx = statusCanvas.getContext("2d");
 
 const COLS = 7;
