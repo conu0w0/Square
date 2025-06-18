@@ -51,13 +51,12 @@ function drawGame() {
 
 function updateStatusTransition() {
   const speed = 0.1;
-  const redTarget = currentPlayer === "red" || gameOver ? 1 : 0;
-  const blueTarget = currentPlayer === "blue" || gameOver ? 1 : 0;
+  const redTarget = gameOver || currentPlayer === "red" ? 1 : 0;
+  const blueTarget = gameOver || currentPlayer === "blue" ? 1 : 0;
 
   redActive += (redTarget - redActive) * speed;
   blueActive += (blueTarget - blueActive) * speed;
 }
-
 
 function drawBoard() {
   boardCtx.clearRect(0, 0, boardCanvas.width, boardCanvas.height);
@@ -152,9 +151,12 @@ function drawStatus() {
   const isDark = document.body.classList.contains("dark");
   const baseY = STATUS_HEIGHT / 2;
 
+  const isTouchDevice = 'ontouchstart' in window;
   const msg = gameOver
     ? currentPlayer === "red" ? "你贏啦 🎉" : "汪汪勝出！"
-    : currentPlayer === "red" ? "輪到你囉！" : "汪汪正在思考…";
+    : currentPlayer === "red"
+    ? isTouchDevice ? "點一下預覽，再點一下落子！" : "輪到你囉！"
+    : "汪汪正在思考…";
 
   // 混合顏色（深 → 亮）
   const redColor = mixColor("#661111", "#ff6b6b", redActive);
@@ -339,15 +341,37 @@ function getCanvasColFromEvent(e) {
 
 function handleInput(e) {
   if (gameOver || fallingPiece || currentPlayer !== "red") return;
+
   const col = getCanvasColFromEvent(e);
   const row = getAvailableRow(col);
   if (row === null || col < 0 || col >= COLS) return;
-  fallingPiece = {
-    col, row, y: 0, vy: 0,
-    color: "red",
-    targetY: row * CELL_SIZE + PADDING
-  };
-  animateDrop();
+
+  const isTouch = !!e.touches;
+
+  if (isTouch) {
+    if (hoverCol === col) {
+      // 第二次點同一欄：落子
+      fallingPiece = {
+        col, row, y: 0, vy: 0,
+        color: "red",
+        targetY: row * CELL_SIZE + PADDING
+      };
+      hoverCol = null;
+      animateDrop();
+    } else {
+      // 第一次點：預覽
+      hoverCol = col;
+      drawBoard();
+    }
+  } else {
+    // 電腦：直接落子
+    fallingPiece = {
+      col, row, y: 0, vy: 0,
+      color: "red",
+      targetY: row * CELL_SIZE + PADDING
+    };
+    animateDrop();
+  }
 }
 
 function updateHoverCol(e) {
@@ -369,9 +393,6 @@ boardCanvas.addEventListener("touchstart", e => {
 boardCanvas.addEventListener("touchmove", e => {
   updateHoverCol(e);
 }, { passive: false });
-boardCanvas.addEventListener("touchend", () => {
-  hoverCol = null;
-});
 document.addEventListener("touchcancel", () => {
   hoverCol = null; drawBoard();
 }, { passive: true });
