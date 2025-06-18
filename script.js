@@ -1,17 +1,25 @@
 // ---------- Canvas 與常數 ----------
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const boardCanvas = document.getElementById("gameCanvas");
+const boardCtx = boardCanvas.getContext("2d");
+
+const statusCanvas = document.getElementById("statusCanvas");
+const statusCtx = statusCanvas.getContext("2d");
 
 const COLS = 7;
 const ROWS = 6;
 const CELL_SIZE = 60;
+const PADDING = 6;
 const STATUS_HEIGHT = 60;
-const BOARD_WIDTH = COLS * CELL_SIZE;
-const BOARD_HEIGHT = ROWS * CELL_SIZE;
-canvas.width = BOARD_WIDTH;
-canvas.height = BOARD_HEIGHT + STATUS_HEIGHT;
 
-const catFaceRadius = Math.min(canvas.width, canvas.height) * 0.04;
+const BOARD_WIDTH = COLS * CELL_SIZE + PADDING * 2;
+const BOARD_HEIGHT = ROWS * CELL_SIZE + PADDING * 2;
+
+boardCanvas.width = BOARD_WIDTH;
+boardCanvas.height = BOARD_HEIGHT;
+statusCanvas.width = BOARD_WIDTH;
+statusCanvas.height = STATUS_HEIGHT;
+
+const catFaceRadius = Math.min(boardCanvas.width, boardCanvas.height) * 0.04;
 
 // ---------- 狀態變數 ----------
 let board, currentPlayer, gameOver, fallingPiece, winCoords, hoverCol;
@@ -28,79 +36,78 @@ function resetGame() {
   hoverCol = null;
 
   document.querySelector(".reset-btn").classList.remove("blink");
-  drawBoard();
+  drawGame();
 
   if (currentPlayer === "blue") scheduleAiMove();
 }
 
 // ---------- 主繪製 ----------
+function drawGame() {
+  drawBoard();
+  drawStatus();
+}
+
 function drawBoard() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+  boardCtx.clearRect(0, 0, boardCanvas.width, boardCanvas.height);
   const isDark = document.body.classList.contains("dark");
+  const offsetX = PADDING;
+  const offsetY = PADDING;
 
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      ctx.save();
-      ctx.strokeStyle = isDark ? "#444" : "#aaa";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(offsetX + c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-      ctx.restore();
+      const x = offsetX + c * CELL_SIZE;
+      const y = offsetY + r * CELL_SIZE;
+
+      boardCtx.save();
+      boardCtx.strokeStyle = isDark ? "#444" : "#aaa";
+      boardCtx.lineWidth = 1;
+      boardCtx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+      boardCtx.restore();
 
       const piece = board[r][c];
-      if (piece) drawPiece(offsetX + c, r, piece);
+      if (piece) drawPiece(x, y, piece);
     }
-  }
-
-  if (hoverCol !== null && !fallingPiece && !gameOver && currentPlayer === "red") {
-    const row = getAvailableRow(hoverCol);
-    if (row !== null) drawPiece(offsetX + hoverCol, row, currentPlayer, true);
   }
 
   if (winCoords) {
     winCoords.forEach(([r, c]) => {
-      ctx.strokeStyle = "gold";
-      ctx.lineWidth = 4;
+      boardCtx.strokeStyle = "gold";
+      boardCtx.lineWidth = 4;
       const x = offsetX + c * CELL_SIZE + 5;
-      const y = r * CELL_SIZE + 5;
+      const y = offsetY + r * CELL_SIZE + 5;
       const size = CELL_SIZE - 10;
-      ctx.beginPath();
-      roundRect(ctx, x, y, size, size, 12);
-      ctx.stroke();
+      boardCtx.beginPath();
+      roundRect(boardCtx, x, y, size, size, 12);
+      boardCtx.stroke();
     });
   }
 
-  if (fallingPiece) {
-    drawPiece(offsetX + fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
-  }
-
-  drawBottomStatus(offsetX);
-
-  ctx.save();
-  ctx.strokeStyle = isDark ? "#fff" : "#333";
-  ctx.lineWidth = 4;
-  ctx.strokeRect(offsetX, 0, BOARD_WIDTH, BOARD_HEIGHT);
-  ctx.restore();
+  boardCtx.save();
+  boardCtx.strokeStyle = isDark ? "#fff" : "#333";
+  boardCtx.lineWidth = 4;
+  boardCtx.strokeRect(offsetX, offsetY, COLS * CELL_SIZE, ROWS * CELL_SIZE);
+  boardCtx.restore();
 }
 
-function drawPiece(col, row, color, preview = false) {
-  const x = col * CELL_SIZE + 5;
-  const y = row * CELL_SIZE + 5;
+function drawPiece(x, y, color, preview = false) {
   const size = CELL_SIZE - 10;
   const radius = 12;
-  const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
+  const gradient = boardCtx.createLinearGradient(x, y, x + size, y + size);
 
   gradient.addColorStop(0, color === "red" ? "#ff4c4c" : "#4ea6ff");
   gradient.addColorStop(1, color === "red" ? "#a03028" : "#1f5fa5");
 
-  ctx.save();
-  ctx.fillStyle = gradient;
-  if (preview) ctx.globalAlpha = 0.4;
-  ctx.shadowColor = !preview ? (document.body.classList.contains("dark") ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)") : "transparent";
-  ctx.shadowBlur = preview ? 0 : 6;
-  roundRect(ctx, x, y, size, size, radius);
-  ctx.fill();
-  ctx.restore();
+  boardCtx.save();
+  boardCtx.fillStyle = gradient;
+  if (preview) boardCtx.globalAlpha = 0.4;
+  boardCtx.shadowColor = !preview
+    ? (document.body.classList.contains("dark") ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)")
+    : "transparent";
+  boardCtx.shadowBlur = preview ? 0 : 6;
+
+  roundRect(boardCtx, x + 5, y + 5, size, size, radius);
+  boardCtx.fill();
+  boardCtx.restore();
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -117,47 +124,51 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function drawBottomStatus(offsetX) {
-  const baseY = BOARD_HEIGHT + 10;
+function drawStatus() {
+  statusCtx.clearRect(0, 0, statusCanvas.width, statusCanvas.height);
+  const isDark = document.body.classList.contains("dark");
+  const baseY = STATUS_HEIGHT / 2;
+
   const msg = gameOver
     ? currentPlayer === "red" ? "你贏啦 🎉" : "汪汪勝出！"
     : currentPlayer === "red" ? "輪到你囉！" : "汪汪正在思考…";
 
-  ctx.save();
-  ctx.globalAlpha = currentPlayer === "red" || gameOver ? 1 : 0.3;
-  ctx.fillStyle = "#ff6b6b";
-  ctx.beginPath();
-  ctx.arc(offsetX + 30, baseY + 20, 20, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
+  statusCtx.save();
+  statusCtx.globalAlpha = currentPlayer === "red" || gameOver ? 1 : 0.3;
+  statusCtx.fillStyle = "#ff6b6b";
+  statusCtx.beginPath();
+  statusCtx.arc(30, baseY, 20, 0, Math.PI * 2);
+  statusCtx.fill();
+  statusCtx.restore();
 
-  ctx.save();
-  ctx.globalAlpha = currentPlayer === "blue" || gameOver ? 1 : 0.3;
-  drawCatFace({
-    x: canvas.width - catFaceRadius - 16,
-    y: baseY + catFaceRadius,
+  statusCtx.save();
+  statusCtx.globalAlpha = currentPlayer === "blue" || gameOver ? 1 : 0.3;
+  drawCatFace(statusCtx, {
+    x: statusCanvas.width - catFaceRadius - 16,
+    y: baseY,
     r: catFaceRadius,
     pat: facePat
   }, { col: "#4ea6ff" });
-  ctx.restore();
+  statusCtx.restore();
 
-  ctx.save();
-  ctx.globalAlpha = 1;
-  ctx.font = "20px 'Noto Sans TC'";
-  ctx.fillStyle = gameOver ? "#ff4757" : "#333";
-  ctx.textAlign = "center";
-  ctx.fillText(msg, canvas.width / 2, baseY + 25);
-  ctx.restore();
+  statusCtx.save();
+  statusCtx.globalAlpha = 1;
+  statusCtx.font = "20px 'Noto Sans TC'";
+  statusCtx.fillStyle = gameOver ? "#ff4757" : (isDark ? "#eee" : "#333");
+  statusCtx.textAlign = "center";
+  statusCtx.fillText(msg, statusCanvas.width / 2, baseY + 7);
+  statusCtx.restore();
 }
 
-function drawCatFace(face, resetbutton) {
+function drawCatFace(ctx, face, resetbutton) {
   const x = face.x, y = face.y, r = face.r;
+  const size = r * 2;
   const cornerRadius = r * 0.3;
 
   ctx.lineWidth = 2;
   ctx.fillStyle = resetbutton.col;
   ctx.strokeStyle = resetbutton.col;
-  roundRect(ctx, x - r, y - r, r * 2, r * 2, cornerRadius);
+  roundRect(ctx, x - r, y - r, size, size, cornerRadius);
   ctx.fill();
   ctx.stroke();
 
@@ -166,7 +177,6 @@ function drawCatFace(face, resetbutton) {
   const earH = r * 0.8;
   const earXOffset = r * 0.5;
 
-  // 左耳
   ctx.beginPath();
   ctx.moveTo(x - earXOffset, earY);
   ctx.lineTo(x - earXOffset - earW / 2, earY + earH);
@@ -175,7 +185,6 @@ function drawCatFace(face, resetbutton) {
   ctx.fill();
   ctx.stroke();
 
-  // 右耳
   ctx.beginPath();
   ctx.moveTo(x + earXOffset, earY);
   ctx.lineTo(x + earXOffset - earW / 2, earY + earH * 0.7);
@@ -184,7 +193,6 @@ function drawCatFace(face, resetbutton) {
   ctx.fill();
   ctx.stroke();
 
-  // 眨眼
   blink_timer++;
   if (blink_timer > blink_interval) {
     blink_counter++;
@@ -205,7 +213,6 @@ function drawCatFace(face, resetbutton) {
     ctx.beginPath(); ctx.moveTo(x + r * 0.3, y - r * 0.3); ctx.lineTo(x + r * 0.7, y - r * 0.3); ctx.stroke();
   }
 
-  // 嘴
   ctx.strokeStyle = "#000";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -251,7 +258,7 @@ function checkForSquareWin(player) {
   return false;
 }
 
-// ---------- 掉落與 AI ----------
+// ---------- 掉落動畫與 AI ----------
 function animateDrop() {
   if (!fallingPiece) return;
   fallingPiece.y += 10;
@@ -267,7 +274,7 @@ function animateDrop() {
       if (currentPlayer === "blue") scheduleAiMove();
     }
   }
-  drawBoard();
+  drawGame();
   if (fallingPiece) requestAnimationFrame(animateDrop);
 }
 
@@ -289,39 +296,35 @@ function aiMove() {
 }
 
 // ---------- 事件監聽 ----------
-canvas.addEventListener("click", handleInput);
-canvas.addEventListener("mousemove", updateHoverCol);
-canvas.addEventListener("mouseleave", () => { hoverCol = null; drawBoard(); });
-
-canvas.addEventListener("touchstart", (e) => { e.preventDefault(); handleInput(e); });
-canvas.addEventListener("touchmove", updateHoverCol);
-canvas.addEventListener("touchend", () => { hoverCol = null; drawBoard(); });
-
-function handleInput(e) {
-  if (gameOver || fallingPiece || currentPlayer !== "red") return;
-  const col = getCanvasColFromEvent(e);
-  const row = getAvailableRow(col);
-  if (row === null || col < 0 || col >= COLS) return;
-  fallingPiece = { col, row, y: 0, color: "red" };
-  animateDrop();
-}
-
-function updateHoverCol(e) {
-  if (gameOver || fallingPiece || currentPlayer !== "red") return;
-  hoverCol = getCanvasColFromEvent(e);
-  if (hoverCol < 0 || hoverCol >= COLS) hoverCol = null;
-  drawBoard();
-}
-
 function getCanvasColFromEvent(e) {
-  const rect = canvas.getBoundingClientRect();
-  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+  const rect = boardCanvas.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const x = (clientX - rect.left) * (canvas.width / rect.width) - offsetX;
+  const scaleX = boardCanvas.width / rect.width;
+  const x = (clientX - rect.left) * scaleX - PADDING;
   return Math.floor(x / CELL_SIZE);
 }
 
-// ---------- UI 控制全域公開 ----------
+boardCanvas.addEventListener("click", handleInput);
+boardCanvas.addEventListener("mousemove", updateHoverCol);
+boardCanvas.addEventListener("mouseleave", () => {
+  hoverCol = null;
+  drawBoard();
+});
+
+boardCanvas.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  handleInput(e);
+}, { passive: false });
+
+boardCanvas.addEventListener("touchmove", (e) => {
+  updateHoverCol(e);
+}, { passive: false });
+
+boardCanvas.addEventListener("touchend", () => {
+  hoverCol = null;
+});
+
+// ---------- UI 控制 ----------
 function goHome() {
   window.location.href = "https://github.com/conu0w0/Square";
 }
@@ -340,7 +343,7 @@ function applyTheme(theme) {
   const themeBtn = document.querySelector(".theme-btn");
   if (themeBtn) themeBtn.textContent = theme === "dark" ? "🌞" : "🌙";
   localStorage.setItem("theme", theme);
-  if (board) drawBoard();
+  drawGame();
 }
 
 function toggleTheme() {
@@ -357,3 +360,9 @@ function toggleTheme() {
 })();
 
 window.onload = resetGame;
+
+// 防止觸控中斷時還殘留 hover 狀態
+document.addEventListener("touchcancel", () => {
+  hoverCol = null;
+  drawBoard();
+}, { passive: true });
