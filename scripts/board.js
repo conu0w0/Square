@@ -39,3 +39,52 @@ function checkForSquareWin(player) {
   }
   return false;
 }
+
+function drawBoard() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      ctx.save();
+      ctx.shadowColor = "transparent";
+      ctx.strokeStyle = "#aaa";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(offsetX + c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      ctx.restore();
+
+      const piece = board[r][c];
+      if (piece) drawPiece(offsetX + c, r, piece);
+    }
+  }
+
+  if (hoverCol !== null && !fallingPiece && !gameOver && currentPlayer === "red") {
+    const row = getAvailableRow(hoverCol);
+    if (row !== null) drawPiece(offsetX + hoverCol, row, currentPlayer, true);
+  }
+
+  if (winCoords) {
+    winCoords.forEach(([r, c]) => {
+      ctx.strokeStyle = "gold";
+      ctx.lineWidth = 4;
+      const x = offsetX + c * CELL_SIZE + 5;
+      const y = r * CELL_SIZE + 5;
+      const size = CELL_SIZE - 10;
+      ctx.beginPath();
+      roundRect(ctx, x, y, size, size, 12);
+      ctx.stroke();
+    });
+  }
+
+  if (fallingPiece) {
+    drawPiece(offsetX + fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
+  }
+
+  drawBottomStatus(offsetX);
+
+  // 畫棋盤外框（依主題切換顏色）
+  ctx.save();
+  const isDark = document.body.classList.contains("dark");
+  ctx.strokeStyle = isDark ? "#fff" : "#333";
+  ctx.lineWidth = 4;
+}
