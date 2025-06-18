@@ -4,58 +4,7 @@ let blink_interval = 120 + Math.floor(Math.random() * 180);
 let counter = 0;
 let facePat = 0;
 
-function drawBoard() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
-
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      ctx.save();
-      ctx.strokeStyle = "#aaa";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(offsetX + c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-      ctx.restore();
-
-      const piece = board[r][c];
-      if (piece) drawPiece(offsetX + c, r, piece);
-    }
-  }
-
-  if (hoverCol !== null && !fallingPiece && !gameOver && currentPlayer === "red") {
-    const row = getAvailableRow(hoverCol);
-    if (row !== null) drawPiece(offsetX + hoverCol, row, currentPlayer, true);
-  }
-
-  if (winCoords) {
-    winCoords.forEach(([r, c]) => {
-      ctx.strokeStyle = "gold";
-      ctx.lineWidth = 4;
-      const x = offsetX + c * CELL_SIZE + 5;
-      const y = r * CELL_SIZE + 5;
-      const size = CELL_SIZE - 10;
-      ctx.beginPath();
-      roundRect(ctx, x, y, size, size, 12);
-      ctx.stroke();
-    });
-  }
-
-  if (fallingPiece) {
-    drawPiece(offsetX + fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
-  }
-
-  drawBottomStatus(offsetX);
-
-  ctx.save();
-  const isDark = document.body.classList.contains("dark");
-  ctx.strokeStyle = isDark ? "#fff" : "#333";
-  ctx.lineWidth = 4;
-  ctx.strokeRect(offsetX, 0, BOARD_WIDTH, BOARD_HEIGHT);
-  ctx.restore();
-}
-
-function drawPiece(col, row, color, preview = false) {
-  const x = col * CELL_SIZE + 5;
-  const y = row * CELL_SIZE + 5;
+function drawPiece(x, y, color, preview = false) {
   const size = CELL_SIZE - 10;
   const radius = 12;
   const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
@@ -64,8 +13,9 @@ function drawPiece(col, row, color, preview = false) {
   gradient.addColorStop(1, color === "red" ? "#c0392b" : "#2980b9");
 
   ctx.save();
-  if (preview) ctx.globalAlpha = 0.4;
-  else {
+  if (preview) {
+    ctx.globalAlpha = 0.4;
+  } else {
     const isDark = document.body.classList.contains("dark");
     ctx.shadowColor = isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)";
     ctx.shadowBlur = 6;
@@ -75,7 +25,7 @@ function drawPiece(col, row, color, preview = false) {
 
   ctx.fillStyle = gradient;
   ctx.beginPath();
-  roundRect(ctx, x, y, size, size, radius);
+  roundRect(ctx, x + 5, y + 5, size, size, radius); // +5 是棋子內縮，保留設計感
   ctx.fill();
   ctx.restore();
 }
@@ -95,7 +45,9 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 function drawBottomStatus(offsetX) {
-  const baseY = BOARD_HEIGHT + 10;
+  const offsetY = 8;
+  const baseY = BOARD_HEIGHT + offsetY + 10;
+
   const msg = gameOver
     ? currentPlayer === "red"
       ? "你贏啦 🎉"
@@ -142,6 +94,7 @@ function drawCatFace(face, resetbutton) {
   ctx.fill();
   ctx.stroke();
 
+  // 左耳
   const earW = r * 0.8;
   const earH = r * 0.8;
   const earY = y - r;
@@ -155,6 +108,7 @@ function drawCatFace(face, resetbutton) {
   ctx.fill();
   ctx.stroke();
 
+  // 右耳
   ctx.beginPath();
   ctx.moveTo(x + earXOffset, earY);
   ctx.lineTo(x + earXOffset - earW / 2, earY + earH * 0.7);
@@ -163,6 +117,7 @@ function drawCatFace(face, resetbutton) {
   ctx.fill();
   ctx.stroke();
 
+  // 眨眼邏輯
   blink_timer++;
   if (blink_timer > blink_interval) {
     blink_counter++;
@@ -175,14 +130,26 @@ function drawCatFace(face, resetbutton) {
 
   if (blink_counter === 0) {
     ctx.fillStyle = "#000";
-    ctx.beginPath(); ctx.arc(x - r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x - r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2);
+    ctx.fill();
   } else {
     ctx.strokeStyle = "#000";
-    ctx.beginPath(); ctx.moveTo(x - r * 0.7, y - r * 0.3); ctx.lineTo(x - r * 0.3, y - r * 0.3); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x + r * 0.3, y - r * 0.3); ctx.lineTo(x + r * 0.7, y - r * 0.3); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.7, y - r * 0.3);
+    ctx.lineTo(x - r * 0.3, y - r * 0.3);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x + r * 0.3, y - r * 0.3);
+    ctx.lineTo(x + r * 0.7, y - r * 0.3);
+    ctx.stroke();
   }
 
+  // 嘴巴
   ctx.strokeStyle = "#000";
   ctx.lineWidth = 2;
   ctx.beginPath();
