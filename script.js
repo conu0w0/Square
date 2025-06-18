@@ -1,7 +1,6 @@
 // ---------- Canvas 與常數 ----------
 const boardCanvas = document.getElementById("boardCanvas");
 const boardCtx = boardCanvas.getContext("2d");
-
 const statusCanvas = document.getElementById("statusCanvas");
 const statusCtx = statusCanvas.getContext("2d");
 
@@ -13,7 +12,6 @@ const STATUS_HEIGHT = 60;
 
 const BOARD_WIDTH = COLS * CELL_SIZE + PADDING * 2;
 const BOARD_HEIGHT = ROWS * CELL_SIZE + PADDING * 2;
-
 boardCanvas.width = BOARD_WIDTH;
 boardCanvas.height = BOARD_HEIGHT;
 statusCanvas.width = BOARD_WIDTH;
@@ -69,12 +67,14 @@ function drawBoard() {
     }
   }
 
+  // 畫掉落中的棋子
   if (fallingPiece) {
     const x = PADDING + fallingPiece.col * CELL_SIZE;
     const y = fallingPiece.y;
     drawPiece(x, y, fallingPiece.color);
   }
 
+  // 勝利方框
   if (winCoords) {
     winCoords.forEach(([r, c]) => {
       boardCtx.strokeStyle = "gold";
@@ -88,13 +88,13 @@ function drawBoard() {
     });
   }
 
-  // 顯示 hover 預覽
+  // Hover 預覽
   if (!fallingPiece && hoverCol !== null && currentPlayer === "red") {
     const x = PADDING + hoverCol * CELL_SIZE;
     const y = PADDING;
-    drawPiece(x, y, "red", true); // preview = true
+    drawPiece(x, y, "red", true);
   }
-  
+
   boardCtx.save();
   boardCtx.strokeStyle = isDark ? "#fff" : "#333";
   boardCtx.lineWidth = 4;
@@ -112,12 +112,8 @@ function drawPiece(x, y, color, preview = false) {
   boardCtx.save();
   boardCtx.fillStyle = gradient;
   if (preview) boardCtx.globalAlpha = 0.4;
-
-  boardCtx.shadowColor = !preview
-    ? (document.body.classList.contains("dark") ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)")
-    : "transparent";
+  boardCtx.shadowColor = preview ? "transparent" : (document.body.classList.contains("dark") ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)");
   boardCtx.shadowBlur = preview ? 0 : 6;
-
   roundRect(boardCtx, x + 5, y + 5, size, size, radius);
   boardCtx.fill();
   boardCtx.restore();
@@ -173,18 +169,71 @@ function drawStatus() {
   statusCtx.restore();
 }
 
-// ---------- 遊戲邏輯 ----------
+function drawCatFace(ctx, face, colorObj) {
+  const x = face.x, y = face.y, r = face.r;
+  const size = r * 2, cornerRadius = r * 0.3;
+  ctx.lineWidth = 2;
+  ctx.fillStyle = ctx.strokeStyle = colorObj.col;
+
+  roundRect(ctx, x - r, y - r, size, size, cornerRadius);
+  ctx.fill(); ctx.stroke();
+
+  const earY = y - r - 6;
+  const earW = r * 0.8;
+  const earH = r * 0.8;
+  const earXOffset = r * 0.5;
+
+  ctx.beginPath();
+  ctx.moveTo(x - earXOffset, earY);
+  ctx.lineTo(x - earXOffset - earW / 2, earY + earH);
+  ctx.lineTo(x - earXOffset + earW / 2, earY + earH * 0.7);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x + earXOffset, earY);
+  ctx.lineTo(x + earXOffset - earW / 2, earY + earH * 0.7);
+  ctx.lineTo(x + earXOffset + earW / 2, earY + earH);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  blink_timer++;
+  if (blink_timer > blink_interval) {
+    blink_counter++;
+    if (blink_counter > 6) {
+      blink_counter = 0;
+      blink_timer = 0;
+      blink_interval = 120 + Math.random() * 180;
+    }
+  }
+
+  if (blink_counter === 0) {
+    ctx.fillStyle = "#000";
+    ctx.beginPath(); ctx.arc(x - r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.strokeStyle = "#000";
+    ctx.beginPath(); ctx.moveTo(x - r * 0.7, y - r * 0.3); ctx.lineTo(x - r * 0.3, y - r * 0.3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.3, y - r * 0.3); ctx.lineTo(x + r * 0.7, y - r * 0.3); ctx.stroke();
+  }
+
+  ctx.strokeStyle = "#000";
+  ctx.beginPath();
+  ctx.moveTo(x - r * 0.4, y + r * 0.4);
+  ctx.quadraticCurveTo(x, y + r * 0.6, x + r * 0.4, y + r * 0.4);
+  ctx.stroke();
+}
+
+// ---------- 邏輯 ----------
 function getAvailableRow(col) {
   for (let r = ROWS - 1; r >= 0; r--) {
     if (!board[r][col]) return r;
   }
   return null;
 }
-
 function isBoardFull() {
   return board.every(row => row.every(cell => cell !== null));
 }
-
 function checkForSquareWin(player) {
   for (let size = 2; size <= Math.min(ROWS, COLS); size++) {
     for (let r = 0; r <= ROWS - size; r++) {
@@ -209,23 +258,16 @@ function checkForSquareWin(player) {
   return false;
 }
 
-// ---------- 掉落動畫與 AI ----------
+// ---------- 動畫與 AI ----------
 function animateDrop() {
   if (!fallingPiece) return;
-
   const gravity = 1;
   fallingPiece.vy += gravity;
   fallingPiece.y += fallingPiece.vy;
 
-  // 到達或超過落點 → 彈跳
   if (fallingPiece.y >= fallingPiece.targetY) {
     fallingPiece.y = fallingPiece.targetY;
-
-    if (fallingPiece.vy > 0) {
-      fallingPiece.vy *= -0.4; // 輕微反彈
-    }
-
-    // 反彈速度太小 → 停止動畫，放入棋盤
+    if (fallingPiece.vy > 0) fallingPiece.vy *= -0.4;
     if (Math.abs(fallingPiece.vy) < 1) {
       board[fallingPiece.row][fallingPiece.col] = fallingPiece.color;
       fallingPiece = null;
@@ -254,7 +296,6 @@ function scheduleAiMove() {
 
 function aiMove() {
   if (gameOver) return;
-
   const options = [];
   for (let c = 0; c < COLS; c++) {
     if (getAvailableRow(c) !== null) options.push(c);
@@ -262,20 +303,15 @@ function aiMove() {
 
   const col = options[Math.floor(Math.random() * options.length)];
   const row = getAvailableRow(col);
-
   fallingPiece = {
-    col,
-    row,
-    y: 0,
-    vy: 0,
+    col, row, y: 0, vy: 0,
     color: "blue",
     targetY: row * CELL_SIZE + PADDING
   };
-
   animateDrop();
 }
 
-// ---------- 事件監聽 ----------
+// ---------- 事件 ----------
 function getCanvasColFromEvent(e) {
   const rect = boardCanvas.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -286,21 +322,14 @@ function getCanvasColFromEvent(e) {
 
 function handleInput(e) {
   if (gameOver || fallingPiece || currentPlayer !== "red") return;
-
   const col = getCanvasColFromEvent(e);
   const row = getAvailableRow(col);
-
   if (row === null || col < 0 || col >= COLS) return;
-
   fallingPiece = {
-    col,
-    row,
-    y: 0,
-    vy: 0, // 初速
+    col, row, y: 0, vy: 0,
     color: "red",
     targetY: row * CELL_SIZE + PADDING
   };
-
   animateDrop();
 }
 
@@ -317,30 +346,28 @@ boardCanvas.addEventListener("mouseleave", () => {
   hoverCol = null;
   drawBoard();
 });
-boardCanvas.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  handleInput(e);
+boardCanvas.addEventListener("touchstart", e => {
+  e.preventDefault(); handleInput(e);
 }, { passive: false });
-boardCanvas.addEventListener("touchmove", (e) => {
+boardCanvas.addEventListener("touchmove", e => {
   updateHoverCol(e);
 }, { passive: false });
 boardCanvas.addEventListener("touchend", () => {
   hoverCol = null;
 });
 document.addEventListener("touchcancel", () => {
-  hoverCol = null;
-  drawBoard();
+  hoverCol = null; drawBoard();
 }, { passive: true });
 
-// ---------- UI 控制 ----------
+// ---------- UI ----------
 function goHome() {
   window.location.href = "https://github.com/conu0w0/Square";
 }
 function toggleRules() {
   document.getElementById("overlay").classList.toggle("hidden");
 }
-function closeRules(event) {
-  event.stopPropagation();
+function closeRules(e) {
+  e.stopPropagation();
   toggleRules();
 }
 function applyTheme(theme) {
@@ -356,10 +383,10 @@ function toggleTheme() {
 }
 
 // ---------- 頁面載入 ----------
-(function () {
+window.onload = () => {
+  resetGame();
   const storedTheme = localStorage.getItem("theme");
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const theme = storedTheme || (prefersDark ? "dark" : "light");
   applyTheme(theme);
-})();
-window.onload = resetGame;
+};
