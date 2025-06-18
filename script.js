@@ -36,6 +36,9 @@ function resetGame() {
   winCoords = null;
   hoverCol = null;
 
+  redActive = currentPlayer === "red" ? 1 : 0;
+  blueActive = currentPlayer === "blue" ? 1 : 0;
+
   document.querySelector(".reset-btn").classList.remove("blink");
 
   updateStatusTransition();
