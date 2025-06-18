@@ -190,32 +190,41 @@ function drawStatus() {
 
 function drawCatFace(ctx, face, colorObj) {
   const x = face.x, y = face.y, r = face.r;
-  const size = r * 2, cornerRadius = r * 0.3;
+  const size = r * 2;
+  const cornerRadius = r * 0.3;
+
+  // === 臉的輪廓 ===
   ctx.lineWidth = 2;
   ctx.fillStyle = ctx.strokeStyle = colorObj.col;
-
   roundRect(ctx, x - r, y - r, size, size, cornerRadius);
-  ctx.fill(); ctx.stroke();
+  ctx.fill();
+  ctx.stroke();
 
+  // === 耳朵 ===
   const earY = y - r - 6;
   const earW = r * 0.8;
   const earH = r * 0.8;
   const earXOffset = r * 0.5;
 
+  // 左耳
   ctx.beginPath();
   ctx.moveTo(x - earXOffset, earY);
   ctx.lineTo(x - earXOffset - earW / 2, earY + earH);
   ctx.lineTo(x - earXOffset + earW / 2, earY + earH * 0.7);
   ctx.closePath();
-  ctx.fill(); ctx.stroke();
+  ctx.fill();
+  ctx.stroke();
 
+  // 右耳
   ctx.beginPath();
   ctx.moveTo(x + earXOffset, earY);
   ctx.lineTo(x + earXOffset - earW / 2, earY + earH * 0.7);
   ctx.lineTo(x + earXOffset + earW / 2, earY + earH);
   ctx.closePath();
-  ctx.fill(); ctx.stroke();
+  ctx.fill();
+  ctx.stroke();
 
+  // === 眨眼計時 ===
   blink_timer++;
   if (blink_timer > blink_interval) {
     blink_counter++;
@@ -226,20 +235,41 @@ function drawCatFace(ctx, face, colorObj) {
     }
   }
 
+  // === 眼睛 ===
   if (blink_counter === 0) {
+    // 睜眼
     ctx.fillStyle = "#000";
-    ctx.beginPath(); ctx.arc(x - r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x - r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + r * 0.5, y - r * 0.3, r * 0.2, 0, Math.PI * 2);
+    ctx.fill();
   } else {
+    // 閉眼
     ctx.strokeStyle = "#000";
-    ctx.beginPath(); ctx.moveTo(x - r * 0.7, y - r * 0.3); ctx.lineTo(x - r * 0.3, y - r * 0.3); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x + r * 0.3, y - r * 0.3); ctx.lineTo(x + r * 0.7, y - r * 0.3); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.7, y - r * 0.3);
+    ctx.lineTo(x - r * 0.3, y - r * 0.3);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + r * 0.3, y - r * 0.3);
+    ctx.lineTo(x + r * 0.7, y - r * 0.3);
+    ctx.stroke();
   }
 
+  // === ω 嘴 ===
   ctx.strokeStyle = "#000";
+
+  // 左弧線
   ctx.beginPath();
-  ctx.moveTo(x - r * 0.4, y + r * 0.4);
-  ctx.quadraticCurveTo(x, y + r * 0.6, x + r * 0.4, y + r * 0.4);
+  ctx.moveTo(x - r * 0.4, y + r * 0.3);
+  ctx.quadraticCurveTo(x - r * 0.2, y + r * 0.5, x, y + r * 0.3);
+  ctx.stroke();
+
+  // 右弧線
+  ctx.beginPath();
+  ctx.quadraticCurveTo(x + r * 0.2, y + r * 0.5, x + r * 0.4, y + r * 0.3);
   ctx.stroke();
 }
 
@@ -293,14 +323,14 @@ function animateDrop() {
     }
 
     if (Math.abs(fallingPiece.vy) < 1) {
-      // 放入棋盤
+      // 落子
       board[fallingPiece.row][fallingPiece.col] = fallingPiece.color;
 
-      // 預設下一位
-      const nextPlayer = currentPlayer === "red" ? "blue" : "red";
+      // 預先切換（讓下一位亮起來）
+      const prevPlayer = currentPlayer;
+      currentPlayer = currentPlayer === "red" ? "blue" : "red";
 
-      // 先記下是否有人獲勝或平手
-      const hasWinner = checkForSquareWin(currentPlayer);
+      const hasWinner = checkForSquareWin(prevPlayer);
       const isFull = isBoardFull();
 
       fallingPiece = null;
@@ -308,9 +338,9 @@ function animateDrop() {
       if (hasWinner || isFull) {
         gameOver = true;
         document.querySelector(".reset-btn").classList.add("blink");
-      } else {
-        currentPlayer = nextPlayer;
-        if (currentPlayer === "blue") scheduleAiMove();
+        currentPlayer = prevPlayer; // 勝負已分，恢復為勝利方亮起
+      } else if (currentPlayer === "blue") {
+        scheduleAiMove();
       }
 
       drawGame();
