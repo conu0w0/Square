@@ -374,6 +374,13 @@ function applyTheme(theme) {
   if (themeBtn) {
     themeBtn.textContent = theme === "dark" ? "🌞" : "🌙";
   }
+  localStorage.setItem("theme", theme);
+
+  if (board) {
+    drawBoard();
+  }
+}
+
 
   localStorage.setItem("theme", theme);
   drawBoard(); // 🆕 主題切換後重新繪製
