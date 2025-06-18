@@ -50,13 +50,14 @@ function drawGame() {
 }
 
 function updateStatusTransition() {
-  const speed = 0.1; // 越小越慢，建議 0.1～0.2
+  const speed = 0.1;
   const redTarget = currentPlayer === "red" || gameOver ? 1 : 0;
   const blueTarget = currentPlayer === "blue" || gameOver ? 1 : 0;
 
   redActive += (redTarget - redActive) * speed;
   blueActive += (blueTarget - blueActive) * speed;
 }
+
 
 function drawBoard() {
   boardCtx.clearRect(0, 0, boardCanvas.width, boardCanvas.height);
@@ -156,8 +157,9 @@ function drawStatus() {
     : currentPlayer === "red" ? "輪到你囉！" : "汪汪正在思考…";
 
   // 混合顏色（深 → 亮）
-  const redColor = mixColor("#aa3c3c", "#ff6b6b", redActive);
-  const blueColor = mixColor("#2a64a0", "#4ea6ff", blueActive);
+  const redColor = mixColor("#661111", "#ff6b6b", redActive);
+  const blueColor = mixColor("#123e78", "#4ea6ff", blueActive);
+
 
   // 畫紅色圓形（不是棋子）
   statusCtx.save();
