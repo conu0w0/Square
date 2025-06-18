@@ -280,22 +280,36 @@ function checkForSquareWin(player) {
 // ---------- 動畫與 AI ----------
 function animateDrop() {
   if (!fallingPiece) return;
+
   const gravity = 1;
   fallingPiece.vy += gravity;
   fallingPiece.y += fallingPiece.vy;
 
   if (fallingPiece.y >= fallingPiece.targetY) {
     fallingPiece.y = fallingPiece.targetY;
-    if (fallingPiece.vy > 0) fallingPiece.vy *= -0.4;
+
+    if (fallingPiece.vy > 0) {
+      fallingPiece.vy *= -0.4;
+    }
+
     if (Math.abs(fallingPiece.vy) < 1) {
+      // 放入棋盤
       board[fallingPiece.row][fallingPiece.col] = fallingPiece.color;
+
+      // 預設下一位
+      const nextPlayer = currentPlayer === "red" ? "blue" : "red";
+
+      // 先記下是否有人獲勝或平手
+      const hasWinner = checkForSquareWin(currentPlayer);
+      const isFull = isBoardFull();
+
       fallingPiece = null;
 
-      if (checkForSquareWin(currentPlayer) || isBoardFull()) {
+      if (hasWinner || isFull) {
         gameOver = true;
         document.querySelector(".reset-btn").classList.add("blink");
       } else {
-        currentPlayer = currentPlayer === "red" ? "blue" : "red";
+        currentPlayer = nextPlayer;
         if (currentPlayer === "blue") scheduleAiMove();
       }
 
