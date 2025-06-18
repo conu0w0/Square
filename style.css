@@ -162,6 +162,7 @@ canvas {
   width: 100%;
   height: auto;
   display: block;
+  margin: 12px 0;
   touch-action: none; /* 防止雙指捏合放大 */
 }
 
