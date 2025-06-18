@@ -162,8 +162,13 @@ canvas {
   width: 100%;
   height: auto;
   display: block;
-  margin: 12px 0;
-  touch-action: none; /* 防止雙指捏合放大 */
+  margin: 24px 0;  /* 調整上下間距，加大空隙 */
+  touch-action: none;
+  box-sizing: border-box;
+  padding: 8px; /* 可選：canvas 裡面也有空隙（需搭配繪圖邏輯） */
+  background-color: #fff; /* 可設背景幫助你觀察空隙 */
+  border-radius: 10px; /* 美觀 */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* 讓它更像卡片 */
 }
 
 /* 響應式 */
