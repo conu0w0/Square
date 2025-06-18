@@ -313,28 +313,13 @@ boardCanvas.addEventListener("touchmove", (e) => {
 
 boardCanvas.addEventListener("touchend", () => {
   hoverCol = null;
+  drawBoard();
 });
 
 document.addEventListener("touchcancel", () => {
   hoverCol = null;
   drawBoard();
 }, { passive: true });
-
-function handleInput(e) {
-  if (gameOver || fallingPiece || currentPlayer !== "red") return;
-  const col = getCanvasColFromEvent(e);
-  const row = getAvailableRow(col);
-  if (row === null || col < 0 || col >= COLS) return;
-  fallingPiece = { col, row, y: 0, color: "red" };
-  animateDrop();
-}
-
-function updateHoverCol(e) {
-  if (gameOver || fallingPiece || currentPlayer !== "red") return;
-  hoverCol = getCanvasColFromEvent(e);
-  if (hoverCol < 0 || hoverCol >= COLS) hoverCol = null;
-  drawBoard();
-}
 
 // ---------- UI 控制 ----------
 function goHome() {
@@ -364,11 +349,11 @@ function toggleTheme() {
 }
 
 // ---------- 頁面載入 ----------
-(function () {
+window.onload = () => {
+  resetGame(); // 初始化棋盤狀態
+  // 再套用主題，避免未初始化 board 就畫圖造成錯誤
   const storedTheme = localStorage.getItem("theme");
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const theme = storedTheme || (prefersDark ? "dark" : "light");
   applyTheme(theme);
-})();
-
-window.onload = resetGame;
+};
