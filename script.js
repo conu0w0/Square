@@ -23,6 +23,9 @@ const catFaceRadius = Math.min(boardCanvas.width, boardCanvas.height) * 0.04;
 let board, currentPlayer, gameOver, fallingPiece, winCoords, hoverCol;
 let blink_counter = 0, blink_timer = 0, blink_interval = 120 + Math.random() * 180;
 let facePat = 0;
+let redActive = 1;   // 紅色目前是否亮
+let blueActive = 0;  // 藍色目前是否亮
+
 
 // ---------- 初始化 ----------
 function resetGame() {
@@ -41,8 +44,18 @@ function resetGame() {
 
 // ---------- 主繪製 ----------
 function drawGame() {
+  updateStatusTransition();
   drawBoard();
   drawStatus();
+}
+
+function updateStatusTransition() {
+  const speed = 0.1; // 越小越慢，建議 0.1～0.2
+  const redTarget = currentPlayer === "red" || gameOver ? 1 : 0;
+  const blueTarget = currentPlayer === "blue" || gameOver ? 1 : 0;
+
+  redActive += (redTarget - redActive) * speed;
+  blueActive += (blueTarget - blueActive) * speed;
 }
 
 function drawBoard() {
@@ -142,26 +155,23 @@ function drawStatus() {
     ? currentPlayer === "red" ? "你贏啦 🎉" : "汪汪勝出！"
     : currentPlayer === "red" ? "輪到你囉！" : "汪汪正在思考…";
 
-  statusCtx.save();
-  statusCtx.globalAlpha = currentPlayer === "red" || gameOver ? 1 : 0.3;
-  statusCtx.fillStyle = "#ff6b6b";
-  statusCtx.beginPath();
-  statusCtx.arc(30, baseY, 20, 0, Math.PI * 2);
-  statusCtx.fill();
-  statusCtx.restore();
+  // 混合顏色（深 → 亮）
+  const redColor = mixColor("#aa3c3c", "#ff6b6b", redActive);
+  const blueColor = mixColor("#2a64a0", "#4ea6ff", blueActive);
 
-  statusCtx.save();
-  statusCtx.globalAlpha = currentPlayer === "blue" || gameOver ? 1 : 0.3;
+  // 畫紅色圓形
+  drawPiece(10, baseY - CELL_SIZE / 2, redColor);
+
+  // 畫汪汪臉
   drawCatFace(statusCtx, {
     x: statusCanvas.width - catFaceRadius - 16,
     y: baseY,
     r: catFaceRadius,
     pat: facePat
-  }, { col: "#4ea6ff" });
-  statusCtx.restore();
+  }, { col: blueColor });
 
+  // 畫中間訊息
   statusCtx.save();
-  statusCtx.globalAlpha = 1;
   statusCtx.font = "20px 'Noto Sans TC'";
   statusCtx.fillStyle = gameOver ? "#ff4757" : (isDark ? "#eee" : "#333");
   statusCtx.textAlign = "center";
@@ -380,6 +390,23 @@ function applyTheme(theme) {
 function toggleTheme() {
   const isDark = document.body.classList.contains("dark");
   applyTheme(isDark ? "light" : "dark");
+}
+
+// ---------- 工具 ----------
+function mixColor(c1, c2, t) {
+  const r1 = parseInt(c1.slice(1, 3), 16);
+  const g1 = parseInt(c1.slice(3, 5), 16);
+  const b1 = parseInt(c1.slice(5, 7), 16);
+
+  const r2 = parseInt(c2.slice(1, 3), 16);
+  const g2 = parseInt(c2.slice(3, 5), 16);
+  const b2 = parseInt(c2.slice(5, 7), 16);
+
+  const r = Math.round(r1 + (r2 - r1) * t);
+  const g = Math.round(g1 + (g2 - g1) * t);
+  const b = Math.round(b1 + (b2 - b1) * t);
+
+  return `rgb(${r},${g},${b})`;
 }
 
 // ---------- 頁面載入 ----------
