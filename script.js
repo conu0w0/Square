@@ -51,18 +51,12 @@ function drawGame() {
 
 function updateStatusTransition() {
   const speed = 0.1;
-
-  const isTouchDevice = 'ontouchstart' in window;
-  const redTurn = !gameOver && currentPlayer === "red";
-  const blueTurn = !gameOver && currentPlayer === "blue";
-
-  const redTarget = redTurn ? 1 : 0;
-  const blueTarget = blueTurn ? 1 : 0;
+  const redTarget = (fallingPiece && fallingPiece.color === "red") || (!fallingPiece && currentPlayer === "red") ? 1 : 0;
+  const blueTarget = (fallingPiece && fallingPiece.color === "blue") || (!fallingPiece && currentPlayer === "blue") ? 1 : 0;
 
   redActive += (redTarget - redActive) * speed;
   blueActive += (blueTarget - blueActive) * speed;
 }
-
 
 function drawBoard() {
   boardCtx.clearRect(0, 0, boardCanvas.width, boardCanvas.height);
@@ -265,14 +259,20 @@ function drawCatFace(ctx, face, colorObj) {
   }
 
   // === ω 嘴 ===
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 2;
+
+  // 左彎
   ctx.beginPath();
-  ctx.moveTo(x - 10, y + 10);
-  ctx.quadraticCurveTo(x - 5, y + 18, x, y + 10);
+  ctx.moveTo(x - r * 0.4, y + r * 0.3);
+  ctx.quadraticCurveTo(x - r * 0.3, y + r * 0.5, x - r * 0.2, y + r * 0.3);
   ctx.stroke();
   
+  // 右彎
   ctx.beginPath();
-  ctx.quadraticCurveTo(x + 5, y + 18, x + 10, y + 10);
-  ctx.stroke(); 
+  ctx.moveTo(x + r * 0.2, y + r * 0.3);
+  ctx.quadraticCurveTo(x + r * 0.3, y + r * 0.5, x + r * 0.4, y + r * 0.3);
+  ctx.stroke();
 }
 
 // ---------- 邏輯 ----------
