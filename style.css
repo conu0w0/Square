@@ -64,6 +64,12 @@ h1 {
   text-align: center;
 }
 
+.left-buttons,
+.right-buttons {
+  display: flex;
+  gap: 6px;
+}
+
 .reset-btn,
 .info-btn,
 .theme-btn,
