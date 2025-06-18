@@ -41,8 +41,11 @@ function checkForSquareWin(player) {
 }
 
 function drawBoard() {
+  const padding = 8; // 對應 canvas 的 CSS padding
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const offsetX = (canvas.width - BOARD_WIDTH) / 2;
+
+  const offsetX = (canvas.width - BOARD_WIDTH) / 2 + padding;
+  const offsetY = padding;
 
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
@@ -50,17 +53,21 @@ function drawBoard() {
       ctx.shadowColor = "transparent";
       ctx.strokeStyle = "#aaa";
       ctx.lineWidth = 1;
-      ctx.strokeRect(offsetX + c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      ctx.strokeRect(offsetX + c * CELL_SIZE, offsetY + r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       ctx.restore();
 
       const piece = board[r][c];
-      if (piece) drawPiece(offsetX + c, r, piece);
+      if (piece) {
+        drawPiece(offsetX + c * CELL_SIZE, offsetY + r * CELL_SIZE, piece);
+      }
     }
   }
 
   if (hoverCol !== null && !fallingPiece && !gameOver && currentPlayer === "red") {
     const row = getAvailableRow(hoverCol);
-    if (row !== null) drawPiece(offsetX + hoverCol, row, currentPlayer, true);
+    if (row !== null) {
+      drawPiece(offsetX + hoverCol * CELL_SIZE, offsetY + row * CELL_SIZE, currentPlayer, true);
+    }
   }
 
   if (winCoords) {
@@ -68,7 +75,7 @@ function drawBoard() {
       ctx.strokeStyle = "gold";
       ctx.lineWidth = 4;
       const x = offsetX + c * CELL_SIZE + 5;
-      const y = r * CELL_SIZE + 5;
+      const y = offsetY + r * CELL_SIZE + 5;
       const size = CELL_SIZE - 10;
       ctx.beginPath();
       roundRect(ctx, x, y, size, size, 12);
@@ -77,7 +84,11 @@ function drawBoard() {
   }
 
   if (fallingPiece) {
-    drawPiece(offsetX + fallingPiece.col, fallingPiece.y / CELL_SIZE, fallingPiece.color);
+    drawPiece(
+      offsetX + fallingPiece.col * CELL_SIZE,
+      offsetY + fallingPiece.y,
+      fallingPiece.color
+    );
   }
 
   drawBottomStatus(offsetX);
@@ -87,4 +98,6 @@ function drawBoard() {
   const isDark = document.body.classList.contains("dark");
   ctx.strokeStyle = isDark ? "#fff" : "#333";
   ctx.lineWidth = 4;
+  ctx.strokeRect(offsetX - 2, offsetY - 2, COLS * CELL_SIZE + 4, ROWS * CELL_SIZE + 4);
+  ctx.restore();
 }
