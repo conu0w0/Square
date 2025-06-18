@@ -159,8 +159,13 @@ function drawStatus() {
   const redColor = mixColor("#aa3c3c", "#ff6b6b", redActive);
   const blueColor = mixColor("#2a64a0", "#4ea6ff", blueActive);
 
-  // 畫紅色圓形
-  drawPiece(10, baseY - CELL_SIZE / 2, redColor);
+  // 畫紅色圓形（不是棋子）
+  statusCtx.save();
+  statusCtx.fillStyle = redColor;
+  statusCtx.beginPath();
+  statusCtx.arc(30, baseY, 20, 0, Math.PI * 2);
+  statusCtx.fill();
+  statusCtx.restore();
 
   // 畫汪汪臉
   drawCatFace(statusCtx, {
