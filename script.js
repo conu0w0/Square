@@ -51,8 +51,8 @@ function drawGame() {
 
 function updateStatusTransition() {
   const speed = 0.1;
-  const redTarget = (fallingPiece && fallingPiece.color === "red") || (!fallingPiece && currentPlayer === "red") ? 1 : 0;
-  const blueTarget = (fallingPiece && fallingPiece.color === "blue") || (!fallingPiece && currentPlayer === "blue") ? 1 : 0;
+  const redTarget = (fallingPiece && fallingPiece.color === "blue") || (!fallingPiece && currentPlayer === "blue") ? 1 : 0;
+  const blueTarget = (fallingPiece && fallingPiece.color === "red") || (!fallingPiece && currentPlayer === "red") ? 1 : 0;
 
   redActive += (redTarget - redActive) * speed;
   blueActive += (blueTarget - blueActive) * speed;
