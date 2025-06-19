@@ -1,7 +1,23 @@
+:root {
+  --bg-color: #f9f9f9;
+  --text-color: #111;
+  --panel-bg: #fff;
+  --canvas-bg: #fff;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+body.dark {
+  --bg-color: #121212;
+  --text-color: #eee;
+  --panel-bg: #1e1e1e;
+  --canvas-bg: #1e1e1e;
+  --shadow: rgba(255, 255, 255, 0.05);
+}
+
 body {
   font-family: "Noto Sans TC", "Poppins", "Arial", sans-serif;
-  background-color: #f9f9f9;
-  color: #111;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   margin: 0;
   padding: 10px;
   display: flex;
@@ -13,28 +29,19 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-body.dark {
-  background-color: #121212;
-  color: #eee;
-}
-
 .game-wrapper {
   width: 100%;
   max-width: 420px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #fff;
+  background-color: var(--panel-bg);
+  color: var(--text-color);
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px var(--shadow);
   padding: 12px;
   box-sizing: border-box;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-body.dark .game-wrapper {
-  background-color: #1e1e1e;
-  box-shadow: 0 2px 10px rgba(255,255,255,0.05);
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .top-bar {
@@ -45,16 +52,11 @@ body.dark .game-wrapper {
   align-items: center;
   margin-bottom: 8px;
   padding: 8px 12px;
-  background-color: #fff;
+  background-color: var(--panel-bg);
   border-radius: 10px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 6px var(--shadow);
   box-sizing: border-box;
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-body.dark .top-bar {
-  background-color: #1e1e1e;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
 
 h1 {
@@ -80,25 +82,15 @@ h1 {
   font-size: 20px;
   border-radius: 50%;
   border: none;
-  background-color: #fff;
-  color: #111;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--panel-bg);
+  color: var(--text-color);
+  box-shadow: 0 1px 4px var(--shadow);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 button:hover {
   transform: scale(1.05);
-}
-
-body.dark .reset-btn,
-body.dark .info-btn,
-body.dark .theme-btn,
-body.dark .close-btn,
-body.dark .home-btn {
-  background-color: #2a2a2a;
-  color: #eee;
-  box-shadow: 0 1px 4px rgba(255, 255, 255, 0.05);
 }
 
 #status {
@@ -132,23 +124,17 @@ body.dark .home-btn {
 }
 
 .rules-popup {
-  background: #fff;
-  color: #111;
+  background: var(--panel-bg);
+  color: var(--text-color);
   padding: 20px;
   border-radius: 16px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.15);
+  box-shadow: 0 0 20px var(--shadow);
   position: relative;
   font-size: 1rem;
   line-height: 1.5;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-body.dark .rules-popup {
-  background-color: #1e1e1e;
-  color: #eee;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .rules-popup p {
@@ -183,23 +169,16 @@ canvas {
   touch-action: none;
   box-sizing: border-box;
   padding: 0;
-  background-color: #fff;
+  background-color: var(--canvas-bg);
   border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  transition: background-color 0.3s ease;
-}
-
-body.dark canvas {
-  background-color: #1e1e1e;
+  box-shadow: 0 2px 10px var(--shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .game-canvas {
   display: block;
   width: 100%;
   max-width: 420px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .status-canvas {
