@@ -187,7 +187,11 @@ function drawStatus() {
   // 畫中間訊息
   statusCtx.save();
   statusCtx.font = "20px 'Noto Sans TC'";
-  statusCtx.fillStyle = gameOver ? "#ff4757" : (isDark ? "#eee" : "#333");
+  if (gameOver) {
+    statusCtx.fillStyle = currentPlayer === "red" ? "#ff4757" : "#4ea6ff";
+  } else {
+    statusCtx.fillStyle = isDark ? "#eee" : "#333";
+  }
   statusCtx.textAlign = "center";
   statusCtx.fillText(msg, statusCanvas.width / 2, baseY + 7);
   statusCtx.restore();
@@ -266,11 +270,11 @@ function drawCatFace(ctx, face, colorObj) {
   // === ω 嘴 ===
   ctx.strokeStyle = "#000";
   ctx.lineWidth = 2;
-
+  
   ctx.beginPath();
-  ctx.moveTo(x - r * 0.4, y + r * 0.3);
-  ctx.quadraticCurveTo(x - r * 0.2, y + r * 0.5, x, y + r * 0.4);
-  ctx.quadraticCurveTo(x + r * 0.2, y + r * 0.5, x + r * 0.4, y + r * 0.3);
+  ctx.moveTo(x - r * 0.5, y + r * 0.25);
+  ctx.quadraticCurveTo(x - r * 0.25, y + r * 0.6, x, y + r * 0.5);
+  ctx.quadraticCurveTo(x + r * 0.25, y + r * 0.6, x + r * 0.5, y + r * 0.25);
   ctx.stroke();
 }
 
